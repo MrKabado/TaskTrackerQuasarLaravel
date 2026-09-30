@@ -38,6 +38,32 @@ class TaskTest extends TestCase
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
     }
 
+    public function test_users_can_track_task_status_through_supported_options(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $task = $this->postJson('/api/tasks', ['title' => 'Track progress'])
+            ->assertCreated()
+            ->assertJsonPath('status', 'pending')
+            ->json();
+
+        foreach (['in_progress', 'completed', 'pending'] as $status) {
+            $this->patchJson("/api/tasks/{$task['id']}", ['status' => $status])
+                ->assertOk()
+                ->assertJsonPath('status', $status);
+        }
+
+        $this->patchJson("/api/tasks/{$task['id']}", ['status' => 'blocked'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('status');
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task['id'],
+            'status' => 'pending',
+        ]);
+    }
+
     public function test_users_can_only_list_and_access_their_own_tasks(): void
     {
         $owner = User::factory()->create();
