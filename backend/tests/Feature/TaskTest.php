@@ -44,6 +44,38 @@ class TaskTest extends TestCase
             ->assertJsonPath('notes', 'Waiting for final review');
 
         $this->deleteJson("/api/tasks/{$task->id}")->assertNoContent();
+        $this->assertSoftDeleted('tasks', ['id' => $task->id]);
+    }
+
+    public function test_users_can_trash_restore_and_permanently_delete_their_tasks(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $task = $user->tasks()->create(['title' => 'Recoverable task']);
+        $otherTask = $otherUser->tasks()->create(['title' => 'Other users task']);
+        $otherTask->delete();
+
+        $this->actingAs($user)
+            ->deleteJson("/api/tasks/{$task->id}")
+            ->assertNoContent();
+
+        $this->assertSoftDeleted('tasks', ['id' => $task->id]);
+        $this->getJson('/api/tasks')->assertOk()->assertJsonCount(0);
+        $this->getJson('/api/tasks/trash')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $task->id);
+
+        $this->postJson("/api/tasks/{$otherTask->id}/restore")->assertNotFound();
+        $this->deleteJson("/api/tasks/{$otherTask->id}/force-delete")->assertNotFound();
+
+        $this->postJson("/api/tasks/{$task->id}/restore")
+            ->assertOk()
+            ->assertJsonPath('id', $task->id);
+        $this->assertDatabaseHas('tasks', ['id' => $task->id, 'deleted_at' => null]);
+
+        $this->deleteJson("/api/tasks/{$task->id}")->assertNoContent();
+        $this->deleteJson("/api/tasks/{$task->id}/force-delete")->assertNoContent();
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
     }
 
@@ -283,6 +315,7 @@ class TaskTest extends TestCase
     public function test_task_endpoints_require_authentication(): void
     {
         $this->getJson('/api/tasks')->assertUnauthorized();
+        $this->getJson('/api/tasks/trash')->assertUnauthorized();
         $this->postJson('/api/tasks', ['title' => 'Private'])->assertUnauthorized();
     }
 

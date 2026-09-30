@@ -11,6 +11,8 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
     Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+    Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum');
+    Route::patch('/profile', [AuthController::class, 'updateProfile'])->middleware('auth:sanctum');
     Route::post('/change-password', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
 
     Route::post('/send-register-otp', [AuthController::class, 'sendRegisterOtp']);
@@ -23,7 +25,12 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::middleware('auth:sanctum')->apiResource('tasks', TaskController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/tasks/trash', [TaskController::class, 'trash']);
+    Route::post('/tasks/{task}/restore', [TaskController::class, 'restore']);
+    Route::delete('/tasks/{task}/force-delete', [TaskController::class, 'forceDestroy']);
+    Route::apiResource('tasks', TaskController::class);
+});
 Route::get('/dashboard', DashboardController::class)->middleware('auth:sanctum');
 
 Route::get('/hello', function () {

@@ -84,6 +84,11 @@ class TaskController extends Controller
         return response()->json($tasks->get());
     }
 
+    public function trash(Request $request): JsonResponse
+    {
+        return response()->json($request->user()->tasks()->onlyTrashed()->latest()->get());
+    }
+
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -130,6 +135,22 @@ class TaskController extends Controller
     {
         $task = $request->user()->tasks()->findOrFail($task->id);
         $task->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function restore(Request $request, string $taskId): JsonResponse
+    {
+        $task = $request->user()->tasks()->onlyTrashed()->findOrFail($taskId);
+        $task->restore();
+
+        return response()->json($task->refresh());
+    }
+
+    public function forceDestroy(Request $request, string $taskId): JsonResponse
+    {
+        $task = $request->user()->tasks()->onlyTrashed()->findOrFail($taskId);
+        $task->forceDelete();
 
         return response()->json(null, 204);
     }
