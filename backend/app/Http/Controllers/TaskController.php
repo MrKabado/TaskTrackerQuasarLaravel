@@ -14,10 +14,12 @@ class TaskController extends Controller
             'search' => ['sometimes', 'string', 'max:255'],
             'status' => ['sometimes', 'in:pending,in_progress,completed'],
             'priority' => ['sometimes', 'in:high,medium,low'],
+            'category' => ['sometimes', 'string', 'max:255'],
             'deadline' => ['sometimes', 'in:today,upcoming,overdue,none'],
             'due_date' => ['sometimes', 'date_format:Y-m-d'],
             'due_date_from' => ['sometimes', 'date_format:Y-m-d'],
             'due_date_to' => ['sometimes', 'date_format:Y-m-d'],
+            'sort_by' => ['sometimes', 'in:newest,oldest,deadline,priority,status'],
         ]);
 
         $tasks = $request->user()->tasks();
@@ -36,6 +38,10 @@ class TaskController extends Controller
 
         if (isset($filters['priority'])) {
             $tasks->where('priority', $filters['priority']);
+        }
+
+        if (isset($filters['category'])) {
+            $tasks->where('category', $filters['category']);
         }
 
         if (isset($filters['deadline'])) {
@@ -61,11 +67,19 @@ class TaskController extends Controller
             $tasks->whereDate('due_date', '<=', $filters['due_date_to']);
         }
 
-        if (isset($filters['deadline']) || isset($filters['due_date']) || isset($filters['due_date_from']) || isset($filters['due_date_to'])) {
-            $tasks->orderBy('due_date')->latest();
-        } else {
-            $tasks->latest();
-        }
+        $sortBy = $filters['sort_by'] ?? (
+            isset($filters['deadline']) || isset($filters['due_date']) || isset($filters['due_date_from']) || isset($filters['due_date_to'])
+                ? 'deadline'
+                : 'newest'
+        );
+
+        match ($sortBy) {
+            'newest' => $tasks->latest(),
+            'oldest' => $tasks->oldest(),
+            'deadline' => $tasks->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END')->orderBy('due_date')->latest(),
+            'priority' => $tasks->orderByRaw("CASE priority WHEN 'high' THEN 1 WHEN 'medium' THEN 2 WHEN 'low' THEN 3 ELSE 4 END")->latest(),
+            'status' => $tasks->orderByRaw("CASE status WHEN 'pending' THEN 1 WHEN 'in_progress' THEN 2 WHEN 'completed' THEN 3 ELSE 4 END")->latest(),
+        };
 
         return response()->json($tasks->get());
     }
@@ -77,6 +91,8 @@ class TaskController extends Controller
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', 'in:pending,in_progress,completed'],
             'priority' => ['sometimes', 'in:high,medium,low'],
+            'category' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
             'due_date' => ['nullable', 'date'],
         ]);
 
@@ -100,6 +116,8 @@ class TaskController extends Controller
             'description' => ['sometimes', 'nullable', 'string'],
             'status' => ['sometimes', 'in:pending,in_progress,completed'],
             'priority' => ['sometimes', 'in:high,medium,low'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'notes' => ['sometimes', 'nullable', 'string'],
             'due_date' => ['sometimes', 'nullable', 'date'],
         ]);
 

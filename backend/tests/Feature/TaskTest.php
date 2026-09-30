@@ -19,11 +19,15 @@ class TaskTest extends TestCase
         $this->postJson('/api/tasks', [
             'title' => 'Write report',
             'description' => 'Quarterly summary',
+            'category' => 'Work',
+            'notes' => 'Gather the latest figures',
             'due_date' => '2026-10-15',
         ])->assertCreated()
             ->assertJsonPath('title', 'Write report')
             ->assertJsonPath('status', 'pending')
             ->assertJsonPath('priority', 'medium')
+            ->assertJsonPath('category', 'Work')
+            ->assertJsonPath('notes', 'Gather the latest figures')
             ->assertJsonPath('user_id', $user->id);
 
         $task = Task::firstOrFail();
@@ -31,9 +35,13 @@ class TaskTest extends TestCase
         $this->patchJson("/api/tasks/{$task->id}", [
             'title' => 'Finish report',
             'status' => 'completed',
+            'category' => 'Personal',
+            'notes' => 'Waiting for final review',
         ])->assertOk()
             ->assertJsonPath('title', 'Finish report')
-            ->assertJsonPath('status', 'completed');
+            ->assertJsonPath('status', 'completed')
+            ->assertJsonPath('category', 'Personal')
+            ->assertJsonPath('notes', 'Waiting for final review');
 
         $this->deleteJson("/api/tasks/{$task->id}")->assertNoContent();
         $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
@@ -152,12 +160,14 @@ class TaskTest extends TestCase
             'title' => 'Due today',
             'status' => 'in_progress',
             'priority' => 'high',
+            'category' => 'Work',
             'due_date' => $today,
         ]);
         $upcoming = $user->tasks()->create([
             'title' => 'Upcoming task',
             'status' => 'pending',
             'priority' => 'medium',
+            'category' => 'School',
             'due_date' => $tomorrow,
         ]);
         $overdue = $user->tasks()->create([
@@ -200,6 +210,74 @@ class TaskTest extends TestCase
         $this->getJson('/api/tasks?deadline=invalid')
             ->assertUnprocessable()
             ->assertJsonValidationErrors('deadline');
+
+        $this->getJson('/api/tasks?category=School')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $upcoming->id);
+    }
+
+    public function test_users_can_sort_tasks_by_each_supported_order(): void
+    {
+        $user = User::factory()->create();
+        $oldest = $user->tasks()->create([
+            'title' => 'Oldest task',
+            'status' => 'completed',
+            'priority' => 'medium',
+            'due_date' => now()->subDay()->toDateString(),
+        ]);
+        $middle = $user->tasks()->create([
+            'title' => 'Middle task',
+            'status' => 'in_progress',
+            'priority' => 'low',
+            'due_date' => now()->toDateString(),
+        ]);
+        $newest = $user->tasks()->create([
+            'title' => 'Newest task',
+            'status' => 'pending',
+            'priority' => 'high',
+            'due_date' => now()->addDay()->toDateString(),
+        ]);
+
+        $oldest->forceFill(['created_at' => now()->subDays(3)])->save();
+        $middle->forceFill(['created_at' => now()->subDays(2)])->save();
+        $newest->forceFill(['created_at' => now()->subDay()])->save();
+
+        $this->actingAs($user);
+
+        $this->getJson('/api/tasks?sort_by=newest')
+            ->assertOk()
+            ->assertJsonPath('0.id', $newest->id)
+            ->assertJsonPath('1.id', $middle->id)
+            ->assertJsonPath('2.id', $oldest->id);
+
+        $this->getJson('/api/tasks?sort_by=oldest')
+            ->assertOk()
+            ->assertJsonPath('0.id', $oldest->id)
+            ->assertJsonPath('1.id', $middle->id)
+            ->assertJsonPath('2.id', $newest->id);
+
+        $this->getJson('/api/tasks?sort_by=deadline')
+            ->assertOk()
+            ->assertJsonPath('0.id', $oldest->id)
+            ->assertJsonPath('1.id', $middle->id)
+            ->assertJsonPath('2.id', $newest->id);
+
+        $this->getJson('/api/tasks?sort_by=priority')
+            ->assertOk()
+            ->assertJsonPath('0.id', $newest->id)
+            ->assertJsonPath('1.id', $oldest->id)
+            ->assertJsonPath('2.id', $middle->id);
+
+        $this->getJson('/api/tasks?sort_by=status')
+            ->assertOk()
+            ->assertJsonPath('0.id', $newest->id)
+            ->assertJsonPath('1.id', $middle->id)
+            ->assertJsonPath('2.id', $oldest->id);
+
+        $this->getJson('/api/tasks?sort_by=invalid')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('sort_by');
     }
 
     public function test_task_endpoints_require_authentication(): void
