@@ -19,6 +19,7 @@ class TaskController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', 'in:pending,in_progress,completed'],
+            'priority' => ['sometimes', 'in:high,medium,low'],
             'due_date' => ['nullable', 'date'],
         ]);
 
@@ -41,6 +42,7 @@ class TaskController extends Controller
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
             'status' => ['sometimes', 'in:pending,in_progress,completed'],
+            'priority' => ['sometimes', 'in:high,medium,low'],
             'due_date' => ['sometimes', 'nullable', 'date'],
         ]);
 

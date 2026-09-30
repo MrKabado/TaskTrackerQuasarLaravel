@@ -23,6 +23,7 @@ class TaskTest extends TestCase
         ])->assertCreated()
             ->assertJsonPath('title', 'Write report')
             ->assertJsonPath('status', 'pending')
+            ->assertJsonPath('priority', 'medium')
             ->assertJsonPath('user_id', $user->id);
 
         $task = Task::firstOrFail();
@@ -61,6 +62,34 @@ class TaskTest extends TestCase
         $this->assertDatabaseHas('tasks', [
             'id' => $task['id'],
             'status' => 'pending',
+        ]);
+    }
+
+    public function test_users_can_set_and_update_task_priority(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $task = $this->postJson('/api/tasks', [
+            'title' => 'Prioritize work',
+            'priority' => 'high',
+        ])->assertCreated()
+            ->assertJsonPath('priority', 'high')
+            ->json();
+
+        foreach (['medium', 'low', 'high'] as $priority) {
+            $this->patchJson("/api/tasks/{$task['id']}", ['priority' => $priority])
+                ->assertOk()
+                ->assertJsonPath('priority', $priority);
+        }
+
+        $this->patchJson("/api/tasks/{$task['id']}", ['priority' => 'urgent'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('priority');
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task['id'],
+            'priority' => 'high',
         ]);
     }
 
