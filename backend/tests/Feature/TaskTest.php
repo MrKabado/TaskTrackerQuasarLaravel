@@ -66,4 +66,41 @@ class TaskTest extends TestCase
         $this->getJson('/api/tasks')->assertUnauthorized();
         $this->postJson('/api/tasks', ['title' => 'Private'])->assertUnauthorized();
     }
+
+    public function test_dashboard_returns_counts_for_the_authenticated_users_tasks(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $today = now()->toDateString();
+        $yesterday = now()->subDay()->toDateString();
+
+        $user->tasks()->createMany([
+            ['title' => 'Pending overdue', 'status' => 'pending', 'due_date' => $yesterday],
+            ['title' => 'In progress today', 'status' => 'in_progress', 'due_date' => $today],
+            ['title' => 'Completed overdue', 'status' => 'completed', 'due_date' => $yesterday],
+            ['title' => 'Pending without due date', 'status' => 'pending'],
+        ]);
+        $otherUser->tasks()->create([
+            'title' => 'Another users overdue task',
+            'status' => 'pending',
+            'due_date' => $yesterday,
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/dashboard')
+            ->assertOk()
+            ->assertExactJson([
+                'total_tasks' => 4,
+                'pending_tasks' => 2,
+                'in_progress_tasks' => 1,
+                'completed_tasks' => 1,
+                'overdue_tasks' => 1,
+                'tasks_due_today' => 1,
+            ]);
+    }
+
+    public function test_dashboard_requires_authentication(): void
+    {
+        $this->getJson('/api/dashboard')->assertUnauthorized();
+    }
 }
