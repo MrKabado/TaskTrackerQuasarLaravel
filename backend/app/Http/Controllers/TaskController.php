@@ -10,7 +10,64 @@ class TaskController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        return response()->json($request->user()->tasks()->latest()->get());
+        $filters = $request->validate([
+            'search' => ['sometimes', 'string', 'max:255'],
+            'status' => ['sometimes', 'in:pending,in_progress,completed'],
+            'priority' => ['sometimes', 'in:high,medium,low'],
+            'deadline' => ['sometimes', 'in:today,upcoming,overdue,none'],
+            'due_date' => ['sometimes', 'date_format:Y-m-d'],
+            'due_date_from' => ['sometimes', 'date_format:Y-m-d'],
+            'due_date_to' => ['sometimes', 'date_format:Y-m-d'],
+        ]);
+
+        $tasks = $request->user()->tasks();
+
+        if (isset($filters['search'])) {
+            $search = $filters['search'];
+            $tasks->where(function ($query) use ($search) {
+                $query->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if (isset($filters['status'])) {
+            $tasks->where('status', $filters['status']);
+        }
+
+        if (isset($filters['priority'])) {
+            $tasks->where('priority', $filters['priority']);
+        }
+
+        if (isset($filters['deadline'])) {
+            $today = now()->toDateString();
+
+            match ($filters['deadline']) {
+                'today' => $tasks->whereDate('due_date', $today)->where('status', '!=', 'completed'),
+                'upcoming' => $tasks->whereDate('due_date', '>', $today)->where('status', '!=', 'completed'),
+                'overdue' => $tasks->whereDate('due_date', '<', $today)->where('status', '!=', 'completed'),
+                'none' => $tasks->whereNull('due_date'),
+            };
+        }
+
+        if (isset($filters['due_date'])) {
+            $tasks->whereDate('due_date', $filters['due_date']);
+        }
+
+        if (isset($filters['due_date_from'])) {
+            $tasks->whereDate('due_date', '>=', $filters['due_date_from']);
+        }
+
+        if (isset($filters['due_date_to'])) {
+            $tasks->whereDate('due_date', '<=', $filters['due_date_to']);
+        }
+
+        if (isset($filters['deadline']) || isset($filters['due_date']) || isset($filters['due_date_from']) || isset($filters['due_date_to'])) {
+            $tasks->orderBy('due_date')->latest();
+        } else {
+            $tasks->latest();
+        }
+
+        return response()->json($tasks->get());
     }
 
     public function store(Request $request): JsonResponse

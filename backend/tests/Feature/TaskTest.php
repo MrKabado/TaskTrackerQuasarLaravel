@@ -116,6 +116,92 @@ class TaskTest extends TestCase
         ]);
     }
 
+    public function test_users_can_search_tasks_by_title_and_description(): void
+    {
+        $user = User::factory()->create();
+        $titleMatch = $user->tasks()->create([
+            'title' => 'Prepare launch plan',
+            'description' => 'Review the timeline',
+        ]);
+        $descriptionMatch = $user->tasks()->create([
+            'title' => 'Follow up',
+            'description' => 'Send the launch proposal',
+        ]);
+        $user->tasks()->create([
+            'title' => 'Unrelated task',
+            'description' => 'No matching content',
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/tasks?search=launch')
+            ->assertOk()
+            ->assertJsonCount(2)
+            ->assertJsonFragment(['id' => $titleMatch->id])
+            ->assertJsonFragment(['id' => $descriptionMatch->id]);
+    }
+
+    public function test_users_can_filter_tasks_by_status_priority_and_deadline(): void
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $today = now()->toDateString();
+        $yesterday = now()->subDay()->toDateString();
+        $tomorrow = now()->addDay()->toDateString();
+
+        $dueToday = $user->tasks()->create([
+            'title' => 'Due today',
+            'status' => 'in_progress',
+            'priority' => 'high',
+            'due_date' => $today,
+        ]);
+        $upcoming = $user->tasks()->create([
+            'title' => 'Upcoming task',
+            'status' => 'pending',
+            'priority' => 'medium',
+            'due_date' => $tomorrow,
+        ]);
+        $overdue = $user->tasks()->create([
+            'title' => 'Overdue task',
+            'status' => 'pending',
+            'priority' => 'low',
+            'due_date' => $yesterday,
+        ]);
+        $user->tasks()->create([
+            'title' => 'Completed overdue task',
+            'status' => 'completed',
+            'due_date' => $yesterday,
+        ]);
+        $user->tasks()->create(['title' => 'No deadline']);
+        $otherUser->tasks()->create([
+            'title' => 'Another users upcoming task',
+            'due_date' => $tomorrow,
+        ]);
+
+        $this->actingAs($user)
+            ->getJson('/api/tasks?status=in_progress&priority=high&deadline=today')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $dueToday->id);
+
+        $this->getJson('/api/tasks?deadline=upcoming')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $upcoming->id);
+
+        $this->getJson('/api/tasks?deadline=overdue')
+            ->assertOk()
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', $overdue->id);
+
+        $this->getJson("/api/tasks?due_date_from={$today}&due_date_to={$tomorrow}")
+            ->assertOk()
+            ->assertJsonCount(2);
+
+        $this->getJson('/api/tasks?deadline=invalid')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('deadline');
+    }
+
     public function test_task_endpoints_require_authentication(): void
     {
         $this->getJson('/api/tasks')->assertUnauthorized();
