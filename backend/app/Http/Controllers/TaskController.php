@@ -136,7 +136,9 @@ class TaskController extends Controller
         $task = $request->user()->tasks()->findOrFail($task->id);
         $task->delete();
 
-        return response()->json(null, 204);
+        return response()->json([
+            'message' => 'Task deleted successfully.',
+        ], 200);
     }
 
     public function restore(Request $request, string $taskId): JsonResponse
