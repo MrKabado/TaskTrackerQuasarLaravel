@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Mail\OtpMail;
+use App\Models\Otp;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -13,9 +16,17 @@ class AuthTest extends TestCase
 
     public function test_user_can_register_with_valid_credentials(): void
     {
+        Otp::create([
+            'email' => 'jane@example.com',
+            'otp' => '123456',
+            'expires_at' => now()->addMinutes(5),
+            'last_sent_at' => now(),
+        ]);
+
         $response = $this->postJson('/api/auth/register', [
             'name' => 'Jane Doe',
             'email' => 'jane@example.com',
+            'otp' => '123456',
             'password' => 'password123',
             'password_confirmation' => 'password123',
         ]);
@@ -29,6 +40,64 @@ class AuthTest extends TestCase
             'email' => 'jane@example.com',
             'name' => 'Jane Doe',
         ]);
+        $this->assertDatabaseMissing('otps', ['email' => 'jane@example.com']);
+    }
+
+    public function test_registration_requires_a_valid_otp(): void
+    {
+        $this->postJson('/api/auth/register', [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('otp');
+
+        $this->postJson('/api/auth/register', [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'otp' => '123456',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertUnprocessable()
+            ->assertJsonPath('message', 'Invalid OTP');
+
+        $this->assertDatabaseMissing('users', ['email' => 'jane@example.com']);
+    }
+
+    public function test_registration_rejects_an_expired_otp(): void
+    {
+        Otp::create([
+            'email' => 'jane@example.com',
+            'otp' => '123456',
+            'expires_at' => now()->subMinute(),
+            'last_sent_at' => now()->subMinutes(6),
+        ]);
+
+        $this->postJson('/api/auth/register', [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'otp' => '123456',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertUnprocessable()
+            ->assertJsonPath('message', 'OTP has expired');
+
+        $this->assertDatabaseMissing('otps', ['email' => 'jane@example.com']);
+        $this->assertDatabaseMissing('users', ['email' => 'jane@example.com']);
+    }
+
+    public function test_registration_otp_can_be_requested(): void
+    {
+        Mail::fake();
+
+        $this->postJson('/api/auth/send-register-otp', [
+            'email' => 'jane@example.com',
+        ])->assertOk()
+            ->assertJsonPath('retry_after', 60);
+
+        $this->assertDatabaseHas('otps', ['email' => 'jane@example.com']);
+        Mail::assertSent(OtpMail::class, fn (OtpMail $mail) => $mail->hasTo('jane@example.com'));
     }
 
     public function test_user_can_view_and_update_profile_information(): void

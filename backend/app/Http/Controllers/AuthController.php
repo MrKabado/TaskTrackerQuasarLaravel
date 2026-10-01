@@ -21,10 +21,31 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'otp' => ['required', 'digits:6'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        $otpRecord = Otp::where('email', $validated['email'])
+            ->where('otp', $validated['otp'])
+            ->first();
+
+        if (! $otpRecord) {
+            return response()->json([
+                'message' => 'Invalid OTP',
+            ], 422);
+        }
+
+        if ($otpRecord->expires_at->isPast()) {
+            $otpRecord->delete();
+
+            return response()->json([
+                'message' => 'OTP has expired',
+            ], 422);
+        }
+
+        unset($validated['otp']);
         $user = User::create($validated);
+        $otpRecord->delete();
         $user->refresh();
 
         return response()->json([
