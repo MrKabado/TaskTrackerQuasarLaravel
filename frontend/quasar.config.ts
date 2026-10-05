@@ -2,6 +2,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -14,7 +15,7 @@ export default defineConfig((/* ctx */) => {
     boot: [],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
-    css: ['app.scss'],
+    css: ['app.scss', 'tailwindcss.css'],
 
     // https://github.com/quasarframework/quasar/tree/dev/extras
     extras: [
@@ -46,7 +47,7 @@ export default defineConfig((/* ctx */) => {
       // https://v2.quasar.dev/quasar-cli-vite/page-routing-with-vue-router#filename-based-routing
       // filenameBasedRouting: true,
 
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
 
       // publicPath: '/',
@@ -62,6 +63,11 @@ export default defineConfig((/* ctx */) => {
       // to write components with JSX/TSX:
       // https://v2.quasar.dev/quasar-cli-vite/handling-vite#jsx-tsx
       // vueJsx: true,
+
+      extendViteConf(viteConf) {
+        viteConf.plugins = viteConf.plugins || [];
+        viteConf.plugins.push(tailwindcss());
+      },
 
       vitePlugins: [
         [
@@ -84,11 +90,11 @@ export default defineConfig((/* ctx */) => {
       // https: true,
       open: true, // opens browser window automatically
       proxy: {
-    '/api': {
-      target: 'http://127.0.0.1:8000',
-      changeOrigin: true,
-    },
-  },
+        '/api': {
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+        },
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
@@ -247,7 +253,5 @@ export default defineConfig((/* ctx */) => {
        */
       extraScripts: [],
     },
-
-
   };
 });
