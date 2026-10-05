@@ -6,6 +6,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 
+import { getAuthToken } from '@/services/auth';
 import routes from './routes';
 
 /*
@@ -32,6 +33,12 @@ export default defineRouter((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE),
+  });
+
+  Router.beforeEach((to) => {
+    if (to.meta.requiresAuth && !getAuthToken()) {
+      return { path: '/login', query: { redirect: to.fullPath } };
+    }
   });
 
   return Router;

@@ -12,6 +12,12 @@ const routes: RouteRecordRaw[] = [
   },
   { path: '/login', component: () => import('@/pages/auth/Login.vue') },
   { path: '/register', component: () => import('@/pages/auth/Register.vue') },
+  { path: '/forgot-password', component: () => import('@/pages/auth/ForgotPassword.vue') },
+  {
+    path: '/dashboard',
+    component: () => import('@/pages/client/HomePage.vue'),
+    meta: { requiresAuth: true },
+  },
 
   // Always leave this as last one,
   // but you can also remove it

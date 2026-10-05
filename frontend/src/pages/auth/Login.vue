@@ -46,7 +46,7 @@
           <p class="mt-2 text-sm text-slate-500">Welcome back. Enter your details below.</p>
         </div>
 
-        <form class="space-y-5" @submit.prevent="showDemoMessage">
+        <form class="space-y-5" @submit.prevent="submitLogin">
           <div>
             <label for="login-email" class="mb-2 block text-sm font-medium text-slate-700"
               >Email address</label
@@ -66,11 +66,10 @@
               <label for="login-password" class="block text-sm font-medium text-slate-700"
                 >Password</label
               >
-              <a
-                href="#"
+              <router-link
+                to="/forgot-password"
                 class="text-xs font-semibold text-blue-700 hover:text-blue-800"
-                @click.prevent
-                >Forgot password?</a
+                >Forgot password?</router-link
               >
             </div>
             <input
@@ -93,14 +92,16 @@
           </label>
           <button
             type="submit"
+            :disabled="isSubmitting"
             class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200"
           >
-            Log in
+            {{ isSubmitting ? 'Logging in…' : 'Log in' }}
           </button>
           <p
             v-if="message"
-            role="status"
-            class="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800"
+            :role="isError ? 'alert' : 'status'"
+            :class="isError ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-800'"
+            class="rounded-lg px-3 py-2 text-sm"
           >
             {{ message }}
           </p>
@@ -119,6 +120,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { getApiErrorMessage, login, storeAuthToken } from '@/services/auth';
 
 defineOptions({ name: 'LoginPage' });
 
@@ -126,8 +129,32 @@ const email = ref('');
 const password = ref('');
 const remember = ref(false);
 const message = ref('');
+const isError = ref(false);
+const isSubmitting = ref(false);
+const route = useRoute();
+const router = useRouter();
 
-function showDemoMessage() {
-  message.value = 'Login is not connected to an authentication service yet.';
+async function submitLogin() {
+  isSubmitting.value = true;
+  message.value = '';
+  isError.value = false;
+
+  try {
+    const response = await login(email.value.trim(), password.value);
+    storeAuthToken(response.token, remember.value);
+
+    const redirect = route.query.redirect;
+    const destination =
+      typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')
+        ? redirect
+        : '/dashboard';
+
+    await router.push(destination);
+  } catch (error: unknown) {
+    isError.value = true;
+    message.value = getApiErrorMessage(error);
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>

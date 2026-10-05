@@ -46,7 +46,7 @@
           <p class="mt-2 text-sm text-slate-500">Start organizing your day with Taskflow.</p>
         </div>
 
-        <form class="space-y-4" @submit.prevent="showDemoMessage">
+        <form class="space-y-4" @submit.prevent="submitRegistration">
           <div>
             <label for="register-name" class="mb-1.5 block text-sm font-medium text-slate-700"
               >Your name</label
@@ -94,10 +94,11 @@
               />
               <button
                 type="button"
+                :disabled="isSendingOtp || otpCooldown > 0"
                 class="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 sm:px-4 sm:text-sm"
                 @click="sendOtp"
               >
-                Send OTP
+                {{ otpButtonLabel }}
               </button>
             </div>
           </div>
@@ -116,16 +117,35 @@
               class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             />
           </div>
+          <div>
+            <label
+              for="register-password-confirmation"
+              class="mb-1.5 block text-sm font-medium text-slate-700"
+              >Confirm password</label
+            >
+            <input
+              id="register-password-confirmation"
+              v-model="passwordConfirmation"
+              type="password"
+              autocomplete="new-password"
+              minlength="8"
+              required
+              placeholder="Enter your password again"
+              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            />
+          </div>
           <button
             type="submit"
+            :disabled="isSubmitting"
             class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200"
           >
-            Create free account
+            {{ isSubmitting ? 'Creating account…' : 'Create free account' }}
           </button>
           <p
             v-if="message"
-            role="status"
-            class="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-800"
+            :role="isError ? 'alert' : 'status'"
+            :class="isError ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-800'"
+            class="rounded-lg px-3 py-2 text-sm"
           >
             {{ message }}
           </p>
@@ -146,7 +166,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { getApiErrorMessage, register, requestRegisterOtp, storeAuthToken } from '@/services/auth';
 
 defineOptions({ name: 'RegisterPage' });
 
@@ -154,15 +176,81 @@ const name = ref('');
 const email = ref('');
 const otp = ref('');
 const password = ref('');
+const passwordConfirmation = ref('');
 const message = ref('');
+const isError = ref(false);
+const isSendingOtp = ref(false);
+const isSubmitting = ref(false);
+const otpCooldown = ref(0);
+const router = useRouter();
+let otpCooldownTimer: ReturnType<typeof setInterval> | undefined;
 
-function sendOtp() {
-  message.value = email.value
-    ? 'OTP delivery is not connected yet. No code has been sent.'
-    : 'Enter your email address before requesting an OTP.';
+onUnmounted(() => {
+  if (otpCooldownTimer) clearInterval(otpCooldownTimer);
+});
+
+const otpButtonLabel = computed(() => {
+  if (isSendingOtp.value) return 'Sending…';
+  if (otpCooldown.value > 0) return `Wait ${otpCooldown.value}s`;
+  return 'Send OTP';
+});
+
+async function sendOtp() {
+  if (!email.value.trim()) {
+    isError.value = true;
+    message.value = 'Enter your email address before requesting an OTP.';
+    return;
+  }
+
+  isSendingOtp.value = true;
+  message.value = '';
+  isError.value = false;
+
+  try {
+    message.value = await requestRegisterOtp(email.value.trim());
+    otpCooldown.value = 60;
+    otpCooldownTimer = setInterval(() => {
+      otpCooldown.value -= 1;
+      if (otpCooldown.value <= 0 && otpCooldownTimer) {
+        clearInterval(otpCooldownTimer);
+        otpCooldownTimer = undefined;
+      }
+    }, 1000);
+  } catch (error: unknown) {
+    isError.value = true;
+    message.value = getApiErrorMessage(error);
+  } finally {
+    isSendingOtp.value = false;
+  }
 }
 
-function showDemoMessage() {
-  message.value = 'Registration is not connected to an authentication service yet.';
+async function submitRegistration() {
+  if (password.value !== passwordConfirmation.value) {
+    isError.value = true;
+    message.value = 'The password confirmation does not match.';
+    return;
+  }
+
+  isSubmitting.value = true;
+  message.value = '';
+  isError.value = false;
+
+  try {
+    const response = await register({
+      name: name.value.trim(),
+      email: email.value.trim(),
+      otp: otp.value,
+      password: password.value,
+      password_confirmation: passwordConfirmation.value,
+    });
+
+    storeAuthToken(response.token, true);
+    await router.push('/dashboard');
+  } catch (error: unknown) {
+    isError.value = true;
+    message.value = getApiErrorMessage(error);
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>
