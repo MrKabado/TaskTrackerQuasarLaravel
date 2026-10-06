@@ -53,6 +53,20 @@ export function clearAuthToken(): void {
   sessionStorage.removeItem('taskflow_token');
 }
 
+export async function validateAuthToken(): Promise<boolean> {
+  try {
+    await api.get<AuthUser>('/auth/user');
+    return true;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      clearAuthToken();
+      return false;
+    }
+
+    throw error;
+  }
+}
+
 export function getApiErrorMessage(error: unknown): string {
   if (!axios.isAxiosError(error)) {
     return 'Something went wrong. Please try again.';

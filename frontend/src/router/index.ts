@@ -6,7 +6,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 
-import { getAuthToken } from '@/services/auth';
+import { getAuthToken, validateAuthToken } from '@/services/auth';
 import routes from './routes';
 
 /*
@@ -35,9 +35,17 @@ export default defineRouter((/* { store, ssrContext } */) => {
     history: createHistory(import.meta.env.QUASAR_VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach((to) => {
-    if (to.meta.requiresAuth && !getAuthToken()) {
-      return { path: '/login', query: { redirect: to.fullPath } };
+  Router.beforeEach(async (to) => {
+    const token = getAuthToken();
+
+    if (to.meta.requiresAuth) {
+      if (!token || !(await validateAuthToken())) {
+        return { path: '/login', query: { redirect: to.fullPath } };
+      }
+    }
+
+    if (token && (to.path === '/login' || to.path === '/register')) {
+      return '/dashboard';
     }
   });
 

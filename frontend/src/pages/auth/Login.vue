@@ -1,127 +1,69 @@
 <template>
-  <main class="grid min-h-screen bg-white lg:grid-cols-2">
-    <section
-      class="relative flex min-h-64 items-end overflow-hidden bg-blue-950 p-7 sm:min-h-80 sm:p-10 lg:min-h-screen lg:p-14"
-    >
-      <img
-        src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1800&q=85"
-        alt="A bright, calm workspace with a desk and office chairs"
-        class="absolute inset-0 size-full object-cover"
-      />
-      <div
-        class="absolute inset-0 bg-gradient-to-br from-blue-950/80 via-blue-900/55 to-sky-800/40"
-      ></div>
-      <div class="relative z-10 max-w-xl text-white">
-        <router-link
-          to="/"
-          class="mb-12 inline-flex items-center gap-2.5 text-xl font-bold tracking-tight text-white lg:mb-0 lg:absolute lg:bottom-[calc(100%+2.5rem)] lg:left-0"
-        >
-          <span class="grid size-9 place-items-center rounded-xl bg-white/15 ring-1 ring-white/20"
-            ><q-icon name="check_circle" size="21px"
-          /></span>
-          taskflow
-        </router-link>
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-blue-100">WELCOME BACK</p>
-        <h1 class="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-          A clearer day<br class="hidden sm:block" />
-          starts here.
-        </h1>
-        <p class="mt-4 max-w-md text-sm leading-6 text-blue-50 sm:text-base sm:leading-7">
-          Pick up where you left off and keep your important work moving forward.
-        </p>
+  <AuthShell
+    kicker="Welcome back"
+    title="Log in to Taskflow"
+    description="Enter your details to access your workspace."
+    footer-text="New to Taskflow?"
+    footer-link="/register"
+    footer-link-text="Create an account"
+  >
+    <form class="auth-form" @submit.prevent="submitLogin">
+      <div class="form-field">
+        <label for="login-email" class="form-label">Email address</label>
+        <input
+          id="login-email"
+          v-model="email"
+          class="form-input"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="you@example.com"
+        />
       </div>
-    </section>
 
-    <section class="flex items-center justify-center px-5 py-12 sm:px-10 lg:px-14">
-      <div class="w-full max-w-md">
-        <router-link
-          to="/"
-          class="mb-9 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
-        >
-          <q-icon name="arrow_back" size="17px" />
-          Back to home
-        </router-link>
-        <div class="mb-8">
-          <h2 class="text-3xl font-bold tracking-tight text-slate-950">Log in to Taskflow</h2>
-          <p class="mt-2 text-sm text-slate-500">Welcome back. Enter your details below.</p>
+      <div class="form-field">
+        <div class="auth-inline">
+          <label for="login-password" class="form-label">Password</label>
+          <router-link to="/forgot-password" class="auth-inline-link">
+            Forgot password?
+          </router-link>
         </div>
-
-        <form class="space-y-5" @submit.prevent="submitLogin">
-          <div>
-            <label for="login-email" class="mb-2 block text-sm font-medium text-slate-700"
-              >Email address</label
-            >
-            <input
-              id="login-email"
-              v-model="email"
-              type="email"
-              autocomplete="email"
-              required
-              placeholder="you@example.com"
-              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-            />
-          </div>
-          <div>
-            <div class="mb-2 flex items-center justify-between">
-              <label for="login-password" class="block text-sm font-medium text-slate-700"
-                >Password</label
-              >
-              <router-link
-                to="/forgot-password"
-                class="text-xs font-semibold text-blue-700 hover:text-blue-800"
-                >Forgot password?</router-link
-              >
-            </div>
-            <input
-              id="login-password"
-              v-model="password"
-              type="password"
-              autocomplete="current-password"
-              required
-              placeholder="Enter your password"
-              class="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-            />
-          </div>
-          <label class="flex items-center gap-2 text-sm text-slate-600">
-            <input
-              v-model="remember"
-              type="checkbox"
-              class="size-4 rounded border-slate-300 accent-blue-600 focus:ring-blue-500"
-            />
-            Remember me
-          </label>
-          <button
-            type="submit"
-            :disabled="isSubmitting"
-            class="w-full rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200"
-          >
-            {{ isSubmitting ? 'Logging in…' : 'Log in' }}
-          </button>
-          <p
-            v-if="message"
-            :role="isError ? 'alert' : 'status'"
-            :class="isError ? 'bg-red-50 text-red-700' : 'bg-blue-50 text-blue-800'"
-            class="rounded-lg px-3 py-2 text-sm"
-          >
-            {{ message }}
-          </p>
-        </form>
-
-        <p class="mt-7 text-center text-sm text-slate-500">
-          Don’t have an account?
-          <router-link to="/register" class="font-semibold text-blue-700 hover:text-blue-800"
-            >Create an account</router-link
-          >
-        </p>
+        <input
+          id="login-password"
+          v-model="password"
+          class="form-input"
+          type="password"
+          autocomplete="current-password"
+          required
+          placeholder="Enter your password"
+        />
       </div>
-    </section>
-  </main>
+
+      <label class="auth-checkbox">
+        <input v-model="remember" type="checkbox" />
+        Remember me
+      </label>
+
+      <button type="submit" class="button-primary" :disabled="isSubmitting">
+        {{ isSubmitting ? 'Logging in…' : 'Log in' }}
+      </button>
+
+      <p
+        v-if="message"
+        :role="isError ? 'alert' : 'status'"
+        :class="['form-notice', { 'is-error': isError, 'is-success': !isError }]"
+      >
+        {{ message }}
+      </p>
+    </form>
+  </AuthShell>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getApiErrorMessage, login, storeAuthToken } from '@/services/auth';
+import AuthShell from '@/components/AuthShell.vue';
 
 defineOptions({ name: 'LoginPage' });
 

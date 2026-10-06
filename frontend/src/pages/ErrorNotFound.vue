@@ -1,19 +1,10 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
-    <div>
-      <div style="font-size: 30vh">404</div>
-
-      <div class="text-h2" style="opacity: 0.4">Oops. Nothing here...</div>
-
-      <q-btn
-        class="q-mt-xl"
-        color="white"
-        text-color="blue"
-        unelevated
-        to="/"
-        label="Go Home"
-        no-caps
-      />
+  <main class="not-found">
+    <div class="not-found-content">
+      <span class="not-found-code">404 / PAGE NOT FOUND</span>
+      <h1>That page doesn’t exist.</h1>
+      <p>The link may be outdated, or the page may have moved.</p>
+      <router-link to="/" class="button-primary">Back to home</router-link>
     </div>
-  </div>
+  </main>
 </template>
