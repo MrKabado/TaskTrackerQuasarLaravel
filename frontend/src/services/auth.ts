@@ -77,9 +77,18 @@ export async function logout(): Promise<void> {
   clearAuthToken();
 }
 
-export async function updateProfile(input: { name: string; email: string }): Promise<AuthUser> {
+export async function updateProfile(input: {
+  name: string;
+  email?: string;
+  otp?: string;
+}): Promise<AuthUser> {
   const response = await api.patch<AuthUser>('/auth/profile', input);
   return response.data;
+}
+
+export async function requestProfileEmailOtp(email: string): Promise<string> {
+  const response = await api.post<{ message: string }>('/auth/send-profile-email-otp', { email });
+  return response.data.message;
 }
 
 export async function changePassword(input: {

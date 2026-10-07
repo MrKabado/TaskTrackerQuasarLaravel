@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
@@ -105,11 +106,68 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'otp' => ['sometimes', 'required', 'digits:6'],
         ]);
 
-        $user->update($validated);
+        $emailChanged = isset($validated['email']) && $validated['email'] !== $user->email;
+
+        if ($emailChanged && ! isset($validated['otp'])) {
+            throw ValidationException::withMessages([
+                'otp' => ['A verification code is required to change your email address.'],
+            ]);
+        }
+
+        DB::transaction(function () use ($user, $validated, $emailChanged): void {
+            $attributes = collect($validated)->only(['name'])->all();
+
+            if ($emailChanged) {
+                $otpRecord = Otp::where('email', $validated['email'])
+                    ->where('otp', $validated['otp'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $otpRecord) {
+                    throw ValidationException::withMessages([
+                        'otp' => ['The verification code is invalid.'],
+                    ]);
+                }
+
+                if ($otpRecord->expires_at->isPast()) {
+                    throw ValidationException::withMessages([
+                        'otp' => ['The verification code has expired. Request a new code.'],
+                    ]);
+                }
+
+                $attributes['email'] = $validated['email'];
+                $attributes['email_verified_at'] = now();
+                $otpRecord->delete();
+            }
+
+            $user->update($attributes);
+        });
 
         return response()->json($user->refresh());
+    }
+
+    public function sendProfileEmailOtp(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $validated = $request->validate([
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+        ]);
+
+        if ($validated['email'] === $user->email) {
+            return response()->json([
+                'message' => 'This is already your current email address.',
+            ], 422);
+        }
+
+        return $this->sendOtpToEmail($validated['email']);
     }
 
     public function changePassword(Request $request): JsonResponse

@@ -20,9 +20,10 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('@/pages/client/HomePage.vue') },
       { path: '/tasks', component: () => import('@/pages/client/TasksPage.vue') },
-      { path: '/settings', component: () => import('@/pages/client/SettingsPage.vue') },
-      { path: '/settings/profile', component: () => import('@/pages/client/ProfilePage.vue') },
-      { path: '/settings/password', component: () => import('@/pages/client/ChangePasswordPage.vue') },
+      { path: '/profile', component: () => import('@/pages/client/ProfilePage.vue') },
+      { path: '/settings', redirect: '/profile' },
+      { path: '/settings/profile', redirect: '/profile' },
+      { path: '/settings/password', redirect: '/profile?changePassword=1' },
     ],
   },
 

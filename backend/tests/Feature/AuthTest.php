@@ -100,6 +100,22 @@ class AuthTest extends TestCase
         Mail::assertSent(OtpMail::class, fn (OtpMail $mail) => $mail->hasTo('jane@example.com'));
     }
 
+    public function test_authenticated_user_can_request_an_otp_for_a_new_profile_email(): void
+    {
+        Mail::fake();
+        $user = User::factory()->create(['email' => 'jane@example.com']);
+
+        $this->actingAs($user)
+            ->postJson('/api/auth/send-profile-email-otp', [
+                'email' => 'jane.new@example.com',
+            ])
+            ->assertOk()
+            ->assertJsonPath('retry_after', 60);
+
+        $this->assertDatabaseHas('otps', ['email' => 'jane.new@example.com']);
+        Mail::assertSent(OtpMail::class, fn (OtpMail $mail) => $mail->hasTo('jane.new@example.com'));
+    }
+
     public function test_user_can_view_and_update_profile_information(): void
     {
         $user = User::factory()->create([
@@ -120,11 +136,48 @@ class AuthTest extends TestCase
             ->assertJsonPath('email', 'jane@example.com');
 
         $this->patchJson('/api/auth/profile', ['email' => 'jane.smith@example.com'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('otp');
+
+        Otp::create([
+            'email' => 'jane.smith@example.com',
+            'otp' => '123456',
+            'expires_at' => now()->addMinutes(5),
+            'last_sent_at' => now(),
+        ]);
+
+        $this->patchJson('/api/auth/profile', [
+            'email' => 'jane.smith@example.com',
+            'otp' => '654321',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('otp');
+
+        Otp::where('email', 'jane.smith@example.com')->update([
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $this->patchJson('/api/auth/profile', [
+            'email' => 'jane.smith@example.com',
+            'otp' => '123456',
+        ])->assertUnprocessable()
+            ->assertJsonValidationErrors('otp');
+
+        Otp::where('email', 'jane.smith@example.com')->update([
+            'expires_at' => now()->addMinutes(5),
+        ]);
+
+        $this->patchJson('/api/auth/profile', [
+            'email' => 'jane.smith@example.com',
+            'otp' => '123456',
+        ])
             ->assertOk()
             ->assertJsonPath('name', 'Jane Smith')
             ->assertJsonPath('email', 'jane.smith@example.com');
 
-        $this->patchJson('/api/auth/profile', ['email' => $otherUser->email])
+        $this->patchJson('/api/auth/profile', [
+            'email' => $otherUser->email,
+            'otp' => '123456',
+        ])
             ->assertUnprocessable()
             ->assertJsonValidationErrors('email');
 
@@ -133,6 +186,7 @@ class AuthTest extends TestCase
             'name' => 'Jane Smith',
             'email' => 'jane.smith@example.com',
         ]);
+        $this->assertDatabaseMissing('otps', ['email' => 'jane.smith@example.com']);
     }
 
     public function test_user_can_change_password(): void

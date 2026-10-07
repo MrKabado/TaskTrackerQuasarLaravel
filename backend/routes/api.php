@@ -13,6 +13,7 @@ Route::prefix('auth')->group(function () {
     Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
     Route::get('/profile', [AuthController::class, 'user'])->middleware('auth:sanctum');
     Route::patch('/profile', [AuthController::class, 'updateProfile'])->middleware('auth:sanctum');
+    Route::post('/send-profile-email-otp', [AuthController::class, 'sendProfileEmailOtp'])->middleware('auth:sanctum');
     Route::post('/change-password', [AuthController::class, 'changePassword'])->middleware('auth:sanctum');
 
     Route::post('/send-register-otp', [AuthController::class, 'sendRegisterOtp']);
