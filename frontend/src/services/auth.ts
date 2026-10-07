@@ -67,6 +67,30 @@ export async function validateAuthToken(): Promise<boolean> {
   }
 }
 
+export async function getCurrentUser(): Promise<AuthUser> {
+  const response = await api.get<AuthUser>('/auth/user');
+  return response.data;
+}
+
+export async function logout(): Promise<void> {
+  await api.post('/auth/logout');
+  clearAuthToken();
+}
+
+export async function updateProfile(input: { name: string; email: string }): Promise<AuthUser> {
+  const response = await api.patch<AuthUser>('/auth/profile', input);
+  return response.data;
+}
+
+export async function changePassword(input: {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}): Promise<string> {
+  const response = await api.post<{ message: string }>('/auth/change-password', input);
+  return response.data.message;
+}
+
 export function getApiErrorMessage(error: unknown): string {
   if (!axios.isAxiosError(error)) {
     return 'Something went wrong. Please try again.';

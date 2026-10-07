@@ -7,13 +7,13 @@
     footer-link="/login"
     footer-link-text="Log in"
   >
-    <form class="auth-form" @submit.prevent="submitRegistration">
-      <div class="form-field">
-        <label for="register-name" class="form-label">Your name</label>
+    <form class="grid gap-[18px]" @submit.prevent="submitRegistration">
+      <div class="grid min-w-0 gap-2">
+        <label for="register-name" class="text-[13px] font-medium text-zinc-700">Your name</label>
         <input
           id="register-name"
           v-model="name"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="text"
           autocomplete="name"
           required
@@ -21,12 +21,14 @@
         />
       </div>
 
-      <div class="form-field">
-        <label for="register-email" class="form-label">Email address</label>
+      <div class="grid min-w-0 gap-2">
+        <label for="register-email" class="text-[13px] font-medium text-zinc-700"
+          >Email address</label
+        >
         <input
           id="register-email"
           v-model="email"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="email"
           autocomplete="email"
           required
@@ -34,13 +36,15 @@
         />
       </div>
 
-      <div class="form-field">
-        <label for="register-otp" class="form-label">Email verification code</label>
-        <div class="otp-row">
+      <div class="grid min-w-0 gap-2">
+        <label for="register-otp" class="text-[13px] font-medium text-zinc-700"
+          >Email verification code</label
+        >
+        <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
           <input
             id="register-otp"
             v-model="otp"
-            class="form-input"
+            class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
             type="text"
             inputmode="numeric"
             autocomplete="one-time-code"
@@ -51,7 +55,7 @@
           />
           <button
             type="button"
-            class="button-secondary"
+            class="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="isSendingOtp || otpCooldown > 0"
             @click="sendOtp"
           >
@@ -60,12 +64,14 @@
         </div>
       </div>
 
-      <div class="form-field">
-        <label for="register-password" class="form-label">Password</label>
+      <div class="grid min-w-0 gap-2">
+        <label for="register-password" class="text-[13px] font-medium text-zinc-700"
+          >Password</label
+        >
         <input
           id="register-password"
           v-model="password"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="password"
           autocomplete="new-password"
           minlength="8"
@@ -74,12 +80,14 @@
         />
       </div>
 
-      <div class="form-field">
-        <label for="register-password-confirmation" class="form-label">Confirm password</label>
+      <div class="grid min-w-0 gap-2">
+        <label for="register-password-confirmation" class="text-[13px] font-medium text-zinc-700"
+          >Confirm password</label
+        >
         <input
           id="register-password-confirmation"
           v-model="passwordConfirmation"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="password"
           autocomplete="new-password"
           minlength="8"
@@ -88,20 +96,31 @@
         />
       </div>
 
-      <button type="submit" class="button-primary" :disabled="isSubmitting">
+      <button
+        type="submit"
+        class="inline-flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-[13px] font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="isSubmitting"
+      >
         {{ isSubmitting ? 'Creating account…' : 'Create account' }}
       </button>
 
       <p
         v-if="message"
         :role="isError ? 'alert' : 'status'"
-        :class="['form-notice', { 'is-error': isError, 'is-success': !isError }]"
+        :class="[
+          'rounded-lg border px-3 py-2.5 text-[13px] leading-relaxed',
+          isError
+            ? 'border-red-200 bg-red-50 text-red-700'
+            : 'border-green-200 bg-green-50 text-green-800',
+        ]"
       >
         {{ message }}
       </p>
     </form>
 
-    <p class="auth-terms">By creating an account, you agree to our terms and privacy policy.</p>
+    <p class="mt-4 text-xs leading-relaxed text-zinc-500">
+      By creating an account, you agree to our terms and privacy policy.
+    </p>
   </AuthShell>
 </template>
 

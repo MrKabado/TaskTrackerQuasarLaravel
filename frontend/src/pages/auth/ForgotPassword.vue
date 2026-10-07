@@ -9,13 +9,13 @@
     footer-link="/login"
     footer-link-text="Log in"
   >
-    <form class="auth-form" @submit.prevent="submitReset">
-      <div class="form-field">
-        <label for="reset-email" class="form-label">Email address</label>
+    <form class="grid gap-[18px]" @submit.prevent="submitReset">
+      <div class="grid min-w-0 gap-2">
+        <label for="reset-email" class="text-[13px] font-medium text-zinc-700">Email address</label>
         <input
           id="reset-email"
           v-model="email"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="email"
           autocomplete="email"
           required
@@ -25,19 +25,21 @@
 
       <button
         type="button"
-        class="button-secondary"
+        class="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
         :disabled="isSendingOtp || otpCooldown > 0"
         @click="sendOtp"
       >
         {{ otpButtonLabel }}
       </button>
 
-      <div class="form-field">
-        <label for="reset-otp" class="form-label">Verification code</label>
+      <div class="grid min-w-0 gap-2">
+        <label for="reset-otp" class="text-[13px] font-medium text-zinc-700"
+          >Verification code</label
+        >
         <input
           id="reset-otp"
           v-model="otp"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="text"
           inputmode="numeric"
           autocomplete="one-time-code"
@@ -48,12 +50,14 @@
         />
       </div>
 
-      <div class="form-field">
-        <label for="reset-password" class="form-label">New password</label>
+      <div class="grid min-w-0 gap-2">
+        <label for="reset-password" class="text-[13px] font-medium text-zinc-700"
+          >New password</label
+        >
         <input
           id="reset-password"
           v-model="password"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="password"
           autocomplete="new-password"
           minlength="8"
@@ -62,12 +66,14 @@
         />
       </div>
 
-      <div class="form-field">
-        <label for="reset-password-confirmation" class="form-label">Confirm new password</label>
+      <div class="grid min-w-0 gap-2">
+        <label for="reset-password-confirmation" class="text-[13px] font-medium text-zinc-700"
+          >Confirm new password</label
+        >
         <input
           id="reset-password-confirmation"
           v-model="passwordConfirmation"
-          class="form-input"
+          class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
           type="password"
           autocomplete="new-password"
           minlength="8"
@@ -76,19 +82,32 @@
         />
       </div>
 
-      <button type="submit" class="button-primary" :disabled="isSubmitting">
+      <button
+        type="submit"
+        class="inline-flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-[13px] font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="isSubmitting"
+      >
         {{ isSubmitting ? 'Resetting password…' : 'Reset password' }}
       </button>
 
       <p
         v-if="message"
         :role="isError ? 'alert' : 'status'"
-        :class="['form-notice', { 'is-error': isError, 'is-success': !isError }]"
+        :class="[
+          'rounded-lg border px-3 py-2.5 text-[13px] leading-relaxed',
+          isError
+            ? 'border-red-200 bg-red-50 text-red-700'
+            : 'border-green-200 bg-green-50 text-green-800',
+        ]"
       >
         {{ message }}
       </p>
 
-      <router-link v-if="resetComplete" to="/login" class="auth-link">
+      <router-link
+        v-if="resetComplete"
+        to="/login"
+        class="text-xs font-medium text-zinc-700 hover:text-zinc-500"
+      >
         Continue to login
       </router-link>
     </form>
