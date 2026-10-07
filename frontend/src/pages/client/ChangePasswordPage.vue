@@ -3,7 +3,7 @@
     <div class="mb-7 flex items-start justify-between gap-5">
       <div>
         <p class="mb-2.5 text-[11px] font-medium text-zinc-400">Workspace / Settings / Password</p>
-        <h1 class="m-0 text-3xl font-semibold tracking-tight text-zinc-900">Change password</h1>
+        <h1 class="heading-page m-0 text-zinc-900">Change password</h1>
         <p class="mt-2 text-[13px] leading-relaxed text-zinc-500">
           Choose a new password to keep your account secure.
         </p>
