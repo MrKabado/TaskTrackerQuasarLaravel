@@ -10,7 +10,30 @@ export interface Task {
   status: TaskStatus;
   priority: 'high' | 'medium' | 'low';
   category: string | null;
+  notes: string | null;
   due_date: string | null;
+}
+
+export interface TaskInput {
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  priority: Task['priority'];
+  category: string | null;
+  notes: string | null;
+  due_date: string | null;
+}
+
+export interface TaskFilters {
+  status?: TaskStatus;
+  priority?: Task['priority'];
+  category?: string;
+  deadline?: 'today' | 'upcoming' | 'overdue' | 'none';
+  due_date?: string;
+  due_date_from?: string;
+  due_date_to?: string;
+  search?: string;
+  sort_by?: 'newest' | 'oldest' | 'deadline' | 'priority' | 'status';
 }
 
 export interface DashboardSummary {
@@ -42,10 +65,21 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   return response.data;
 }
 
-export async function getTasks(params: {
-  status?: TaskStatus;
-  deadline?: 'overdue';
-} = {}): Promise<Task[]> {
+export async function getTasks(params: TaskFilters = {}): Promise<Task[]> {
   const response = await api.get<Task[]>('/tasks', { params });
   return response.data;
+}
+
+export async function createTask(input: TaskInput): Promise<Task> {
+  const response = await api.post<Task>('/tasks', input);
+  return response.data;
+}
+
+export async function updateTask(id: number, input: TaskInput): Promise<Task> {
+  const response = await api.patch<Task>(`/tasks/${id}`, input);
+  return response.data;
+}
+
+export async function deleteTask(id: number): Promise<void> {
+  await api.delete(`/tasks/${id}`);
 }
