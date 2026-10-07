@@ -127,21 +127,17 @@
           :key="task.id"
           class="flex min-h-[69px] items-center gap-2.5 border-b border-zinc-100 px-3 py-3 last:border-0 sm:gap-3 sm:px-5"
         >
-          <span
-            class="size-[9px] shrink-0 rounded-full"
-            :class="
-              task.status === 'completed'
-                ? 'bg-green-600'
-                : task.status === 'in_progress'
-                  ? 'bg-blue-500'
-                  : 'bg-zinc-300'
-            "
-          />
           <span class="grid min-w-0 flex-1 gap-1">
             <strong class="truncate text-xs font-medium">{{ task.title }}</strong>
             <span class="truncate text-[11px] text-zinc-400">{{
               task.category || task.description || 'No additional details'
             }}</span>
+          </span>
+          <span
+            class="inline-flex shrink-0 rounded-full px-2 py-1 text-[9px] font-medium sm:px-2.5 sm:text-[10px]"
+            :class="taskStatusClass(task)"
+          >
+            {{ taskStatusLabel(task) }}
           </span>
           <span
             class="hidden rounded-full px-2 py-1 text-[10px] capitalize sm:inline"
@@ -551,5 +547,28 @@ function formatDueDate(date: string | null): string {
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(
     new Date(`${date}T00:00:00`),
   );
+}
+
+function isOverdue(task: Task): boolean {
+  const today = new Date();
+  today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+  const localDate = today.toISOString().slice(0, 10);
+
+  return task.status !== 'completed' && task.due_date !== null && task.due_date < localDate;
+}
+
+function taskStatusLabel(task: Task): string {
+  if (isOverdue(task)) return 'Overdue';
+  if (task.status === 'in_progress') return 'In progress';
+  return task.status === 'completed' ? 'Completed' : 'Pending';
+}
+
+function taskStatusClass(task: Task): string {
+  if (isOverdue(task)) return 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-200/70';
+  if (task.status === 'in_progress')
+    return 'bg-sky-50 text-sky-700 ring-1 ring-inset ring-sky-200/70';
+  if (task.status === 'completed')
+    return 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200/70';
+  return 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200/70';
 }
 </script>

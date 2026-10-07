@@ -54,17 +54,19 @@
             <q-icon
               :name="card.icon"
               size="20px"
-              class="text-zinc-400"
+              class="rounded-lg p-2"
+              :class="card.iconTone"
             />
           </div>
 
           <h2
-            class="heading-metric mt-4 text-zinc-950"
+            class="heading-metric mt-4"
+            :class="card.valueTone"
           >
             {{ card.value }}
           </h2>
 
-          <p class="mt-2 text-xs text-zinc-400">
+          <p class="mt-2 text-xs" :class="card.captionTone">
             {{ card.caption }}
           </p>
         </article>
@@ -139,30 +141,30 @@
           </div>
 
           <div class="space-y-5 p-6">
-            <div>
-              <p class="text-xs uppercase tracking-wide text-zinc-400">
+            <div class="rounded-xl bg-amber-50/70 p-3.5">
+              <p class="text-xs font-medium uppercase tracking-wide text-amber-700">
                 Pending Tasks
               </p>
-              <p class="mt-1 text-2xl font-semibold">
+              <p class="mt-1 text-2xl font-semibold text-amber-800">
                 {{ summary.pending_tasks }}
               </p>
             </div>
 
-            <div>
-              <p class="text-xs uppercase tracking-wide text-zinc-400">
+            <div class="rounded-xl bg-sky-50/70 p-3.5">
+              <p class="text-xs font-medium uppercase tracking-wide text-sky-700">
                 Due Today
               </p>
-              <p class="mt-1 text-2xl font-semibold">
+              <p class="mt-1 text-2xl font-semibold text-sky-800">
                 {{ summary.tasks_due_today }}
               </p>
             </div>
 
-            <div>
-              <p class="text-xs uppercase tracking-wide text-zinc-400">
+            <div class="rounded-xl bg-emerald-50/70 p-3.5">
+              <p class="text-xs font-medium uppercase tracking-wide text-emerald-700">
                 Completion Rate
               </p>
 
-              <p class="mt-1 text-2xl font-semibold">
+              <p class="mt-1 text-2xl font-semibold text-emerald-800">
                 {{
                   summary.total_tasks
                     ? Math.round(
@@ -178,45 +180,6 @@
         </section>
       </div>
 
-      <!-- Upcoming -->
-      <section
-        class="mt-6 rounded-2xl border border-zinc-200 bg-white"
-      >
-        <div class="border-b border-zinc-100 px-6 py-5">
-          <h2
-            class="text-lg font-semibold tracking-tight text-zinc-950"
-          >
-            Productivity Snapshot
-          </h2>
-
-          <p class="mt-1 text-sm text-zinc-500">
-            Stay consistent and keep moving forward.
-          </p>
-        </div>
-
-        <div class="grid gap-4 p-6 md:grid-cols-3">
-          <div class="rounded-xl bg-zinc-50 p-4">
-            <p class="text-xs text-zinc-500">Completed</p>
-            <p class="mt-2 text-2xl font-semibold">
-              {{ summary.completed_tasks }}
-            </p>
-          </div>
-
-          <div class="rounded-xl bg-zinc-50 p-4">
-            <p class="text-xs text-zinc-500">In Progress</p>
-            <p class="mt-2 text-2xl font-semibold">
-              {{ summary.in_progress_tasks }}
-            </p>
-          </div>
-
-          <div class="rounded-xl bg-zinc-50 p-4">
-            <p class="text-xs text-zinc-500">Overdue</p>
-            <p class="mt-2 text-2xl font-semibold">
-              {{ summary.overdue_tasks }}
-            </p>
-          </div>
-        </div>
-      </section>
     </template>
   </section>
 </template>
@@ -241,24 +204,36 @@ const summaryCards = computed(() => {
       value: summary.value.total_tasks,
       caption: 'All tasks in workspace',
       icon: 'checklist',
+      iconTone: 'bg-zinc-100 text-zinc-600',
+      valueTone: 'text-zinc-900',
+      captionTone: 'text-zinc-400',
     },
     {
       label: 'In Progress',
       value: summary.value.in_progress_tasks,
       caption: 'Currently active',
       icon: 'autorenew',
+      iconTone: 'bg-sky-50 text-sky-700',
+      valueTone: 'text-sky-800',
+      captionTone: 'text-sky-700/70',
     },
     {
       label: 'Completed',
       value: summary.value.completed_tasks,
       caption: 'Successfully finished',
       icon: 'task_alt',
+      iconTone: 'bg-emerald-50 text-emerald-700',
+      valueTone: 'text-emerald-800',
+      captionTone: 'text-emerald-700/70',
     },
     {
       label: 'Overdue',
       value: summary.value.overdue_tasks,
       caption: 'Require attention',
       icon: 'schedule',
+      iconTone: 'bg-rose-50 text-rose-700',
+      valueTone: 'text-rose-800',
+      captionTone: 'text-rose-700/70',
     },
   ];
 });
