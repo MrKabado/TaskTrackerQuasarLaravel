@@ -75,7 +75,7 @@ export async function createTask(input: TaskInput): Promise<Task> {
   return response.data;
 }
 
-export async function updateTask(id: number, input: TaskInput): Promise<Task> {
+export async function updateTask(id: number, input: Partial<TaskInput>): Promise<Task> {
   const response = await api.patch<Task>(`/tasks/${id}`, input);
   return response.data;
 }

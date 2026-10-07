@@ -9,7 +9,7 @@
         </p>
       </div>
       <button
-        class="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+        class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
         type="button"
         @click="openCreate"
       >
@@ -55,7 +55,7 @@
             placeholder="Search tasks"
           />
           <button
-            class="grid size-[38px] shrink-0 place-items-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:bg-zinc-50"
+            class="grid size-[38px] shrink-0 cursor-pointer place-items-center rounded-lg border border-zinc-200 text-zinc-600 transition hover:bg-zinc-50"
             type="submit"
             aria-label="Search tasks"
           >
@@ -73,7 +73,7 @@
           :key="filter.label"
           type="button"
           :class="[
-            'shrink-0 rounded-t-md border-b-2 px-3 pb-3 text-[11px] transition-colors hover:text-zinc-900',
+            'shrink-0 cursor-pointer rounded-t-md border-b-2 px-3 pb-3 text-[11px] transition-colors hover:text-zinc-900',
             activeFilter === filter.label
               ? 'border-zinc-800 font-semibold text-zinc-900'
               : 'border-transparent text-zinc-500',
@@ -114,7 +114,7 @@
         </span>
         <button
           v-if="activeFilter === 'All Tasks' && !currentSearch"
-          class="mt-2 text-xs font-medium text-zinc-800 underline underline-offset-4"
+          class="mt-2 cursor-pointer text-xs font-medium text-zinc-800 underline underline-offset-4"
           type="button"
           @click="openCreate"
         >
@@ -125,52 +125,77 @@
         <li
           v-for="task in tasks"
           :key="task.id"
-          class="flex min-h-[69px] items-center gap-2.5 border-b border-zinc-100 px-3 py-3 last:border-0 sm:gap-3 sm:px-5"
+          class="flex min-h-[69px] items-center gap-2.5 border-b border-zinc-100 px-3 py-2 last:border-0 sm:gap-3 sm:px-5"
         >
-          <span class="grid min-w-0 flex-1 gap-1">
-            <strong class="truncate text-xs font-medium">{{ task.title }}</strong>
-            <span class="truncate text-[11px] text-zinc-400">{{
-              task.category || task.description || 'No additional details'
-            }}</span>
-          </span>
-          <span
-            class="inline-flex shrink-0 rounded-full px-2 py-1 text-[9px] font-medium sm:px-2.5 sm:text-[10px]"
-            :class="taskStatusClass(task)"
-          >
-            {{ taskStatusLabel(task) }}
-          </span>
-          <span
-            class="hidden rounded-full px-2 py-1 text-[10px] capitalize sm:inline"
-            :class="
-              task.priority === 'high'
-                ? 'bg-red-50 text-red-700'
-                : task.priority === 'medium'
-                  ? 'bg-amber-50 text-amber-700'
-                  : 'bg-zinc-100 text-zinc-600'
-            "
-          >
-            {{ task.priority }}
-          </span>
-          <span
-            class="hidden w-[85px] shrink-0 text-right text-[10px] text-zinc-500 sm:block sm:text-[11px]"
-            >{{ formatDueDate(task.due_date) }}</span
-          >
           <button
-            class="grid size-8 shrink-0 place-items-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900"
+            class="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-lg text-left transition hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:gap-3"
             type="button"
-            :aria-label="`Edit ${task.title}`"
-            @click="openEdit(task)"
+            :aria-label="`View task: ${task.title}`"
+            @click="openTask(task)"
           >
-            <q-icon name="edit" size="17px" />
+            <span class="grid min-w-0 flex-1 gap-1">
+              <strong class="truncate text-xs font-medium">{{ task.title }}</strong>
+              <span class="truncate text-[11px] text-zinc-400">{{
+                task.category || task.description || 'No additional details'
+              }}</span>
+            </span>
+            <span
+              class="inline-flex shrink-0 rounded-full px-2 py-1 text-[9px] font-medium sm:px-2.5 sm:text-[10px]"
+              :class="taskStatusClass(task)"
+            >
+              {{ taskStatusLabel(task) }}
+            </span>
+            <span
+              class="hidden rounded-full px-2 py-1 text-[10px] capitalize sm:inline"
+              :class="
+                task.priority === 'high'
+                  ? 'bg-red-50 text-red-700'
+                  : task.priority === 'medium'
+                    ? 'bg-amber-50 text-amber-700'
+                    : 'bg-zinc-100 text-zinc-600'
+              "
+            >
+              {{ task.priority }}
+            </span>
+            <span
+              class="hidden w-[85px] shrink-0 text-right text-[10px] text-zinc-500 sm:block sm:text-[11px]"
+              >{{ formatDueDate(task.due_date) }}</span
+            >
+            <q-icon name="chevron_right" size="18px" class="shrink-0 text-zinc-400" />
           </button>
-          <button
-            class="grid size-8 shrink-0 place-items-center rounded-lg text-zinc-400 transition hover:bg-red-50 hover:text-red-700"
-            type="button"
-            :aria-label="`Delete ${task.title}`"
-            @click="confirmDelete(task)"
-          >
-            <q-icon name="delete_outline" size="18px" />
-          </button>
+          <div class="flex shrink-0 items-center gap-1">
+            <button
+              v-if="task.status !== 'in_progress'"
+              class="grid size-8 cursor-pointer place-items-center rounded-lg border border-sky-200/70 bg-sky-50/70 text-sky-700 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              :title="`Mark ${task.title} as in progress`"
+              :aria-label="`Mark ${task.title} as in progress`"
+              :disabled="taskActionId !== null"
+              @click="setTaskStatus(task, 'in_progress')"
+            >
+              <q-icon name="play_arrow" size="18px" />
+            </button>
+            <button
+              v-if="task.status !== 'completed'"
+              class="grid size-8 cursor-pointer place-items-center rounded-lg border border-emerald-200/70 bg-emerald-50/70 text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              :title="`Mark ${task.title} as completed`"
+              :aria-label="`Mark ${task.title} as completed`"
+              :disabled="taskActionId !== null"
+              @click="setTaskStatus(task, 'completed')"
+            >
+              <q-icon name="task_alt" size="17px" />
+            </button>
+            <button
+              class="grid size-8 cursor-pointer place-items-center rounded-lg text-zinc-400 transition hover:bg-red-50 hover:text-red-700"
+              type="button"
+              :title="`Delete ${task.title}`"
+              :aria-label="`Delete ${task.title}`"
+              @click="confirmDelete(task)"
+            >
+              <q-icon name="delete_outline" size="18px" />
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -181,12 +206,24 @@
           <q-card-section class="flex items-start justify-between gap-4 border-b border-zinc-100">
             <div>
               <h2 class="text-base font-semibold text-zinc-900">
-                {{ editingTaskId === null ? 'Create task' : 'Edit task' }}
+                {{
+                  modalMode === 'create'
+                    ? 'Create task'
+                    : modalMode === 'edit'
+                      ? 'Edit task'
+                      : selectedTask?.title
+                }}
               </h2>
-              <p class="mt-1 text-xs text-zinc-500">Add the details you need to stay on track.</p>
+              <p class="mt-1 text-xs text-zinc-500">
+                {{
+                  modalMode === 'details'
+                    ? 'Task details'
+                    : 'Add the details you need to stay on track.'
+                }}
+              </p>
             </div>
             <button
-              class="grid size-8 shrink-0 place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"
+              class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-lg text-zinc-500 hover:bg-zinc-100"
               type="button"
               aria-label="Close task form"
               @click="closeForm"
@@ -195,7 +232,63 @@
             </button>
           </q-card-section>
 
-          <q-card-section class="grid max-h-[65vh] gap-4 overflow-y-auto">
+          <q-card-section
+            v-if="modalMode === 'details' && selectedTask"
+            class="grid max-h-[65vh] gap-5 overflow-y-auto"
+          >
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium"
+                :class="taskStatusClass(selectedTask)"
+              >
+                {{ taskStatusLabel(selectedTask) }}
+              </span>
+              <span
+                class="inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium capitalize"
+                :class="
+                  selectedTask.priority === 'high'
+                    ? 'bg-red-50 text-red-700'
+                    : selectedTask.priority === 'medium'
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'bg-zinc-100 text-zinc-600'
+                "
+              >
+                {{ selectedTask.priority }} priority
+              </span>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                  Category
+                </p>
+                <p class="mt-1 text-sm text-zinc-800">{{ selectedTask.category || 'None' }}</p>
+              </div>
+              <div>
+                <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                  Due date
+                </p>
+                <p class="mt-1 text-sm text-zinc-800">
+                  {{ formatDueDate(selectedTask.due_date) }}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                Description
+              </p>
+              <p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">
+                {{ selectedTask.description || 'No description provided.' }}
+              </p>
+            </div>
+            <div>
+              <p class="text-[11px] font-medium uppercase tracking-wide text-zinc-400">Notes</p>
+              <p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-700">
+                {{ selectedTask.notes || 'No notes.' }}
+              </p>
+            </div>
+          </q-card-section>
+
+          <q-card-section v-else class="grid max-h-[65vh] gap-4 overflow-y-auto">
             <div class="grid min-w-0 gap-2">
               <label for="task-title" class="text-xs font-medium text-zinc-700">Title</label>
               <input
@@ -297,21 +390,40 @@
           </q-card-section>
 
           <q-card-actions align="right" class="border-t border-zinc-100 px-5 py-4">
-            <button
-              class="inline-flex min-h-[38px] items-center justify-center rounded-lg px-3.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 disabled:opacity-60"
-              type="button"
-              :disabled="isSaving"
-              @click="closeForm"
-            >
-              Cancel
-            </button>
-            <button
-              class="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
-              type="submit"
-              :disabled="isSaving"
-            >
-              {{ isSaving ? 'Saving…' : editingTaskId === null ? 'Create task' : 'Save changes' }}
-            </button>
+            <template v-if="modalMode === 'details'">
+              <button
+                class="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-lg px-3.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100"
+                type="button"
+                @click="closeForm"
+              >
+                Close
+              </button>
+              <button
+                class="inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700"
+                type="button"
+                @click="beginEdit"
+              >
+                <q-icon name="edit" size="15px" />
+                Edit
+              </button>
+            </template>
+            <template v-else>
+              <button
+                class="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-lg px-3.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-60"
+                type="button"
+                :disabled="isSaving"
+                @click="modalMode === 'edit' ? cancelEdit() : closeForm()"
+              >
+                Cancel
+              </button>
+              <button
+                class="inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60"
+                type="submit"
+                :disabled="isSaving"
+              >
+                {{ isSaving ? 'Saving…' : modalMode === 'create' ? 'Create task' : 'Save changes' }}
+              </button>
+            </template>
           </q-card-actions>
         </q-form>
       </q-card>
@@ -334,7 +446,7 @@
         </q-card-section>
         <q-card-actions align="right" class="px-5 pb-4">
           <button
-            class="inline-flex min-h-[38px] items-center justify-center rounded-lg px-3.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100"
+            class="inline-flex min-h-[38px] cursor-pointer items-center justify-center rounded-lg px-3.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100"
             type="button"
             :disabled="isDeleting"
             @click="isDeleteDialogOpen = false"
@@ -342,7 +454,7 @@
             Cancel
           </button>
           <button
-            class="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-lg bg-red-600 px-3.5 text-xs font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-red-600 px-3.5 text-xs font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
             type="button"
             :disabled="isDeleting"
             @click="deleteSelectedTask"
@@ -391,8 +503,10 @@ const isLoading = ref(true);
 const isSaving = ref(false);
 const isDeleting = ref(false);
 const isFormOpen = ref(false);
+const modalMode = ref<'create' | 'details' | 'edit'>('create');
 const isDeleteDialogOpen = ref(false);
 const editingTaskId = ref<number | null>(null);
+const selectedTask = ref<Task | null>(null);
 const taskToDelete = ref<Task | null>(null);
 const searchInput = ref('');
 const currentSearch = ref('');
@@ -400,6 +514,7 @@ const error = ref('');
 const formError = ref('');
 const deleteError = ref('');
 const feedback = ref('');
+const taskActionId = ref<number | null>(null);
 const form = ref<TaskInput>(emptyTask());
 
 const emptyTitle = computed(() => {
@@ -454,25 +569,41 @@ function searchTasks() {
 }
 
 function openCreate() {
+  modalMode.value = 'create';
   editingTaskId.value = null;
+  selectedTask.value = null;
   form.value = emptyTask();
   formError.value = '';
   isFormOpen.value = true;
 }
 
-function openEdit(task: Task) {
-  editingTaskId.value = task.id;
-  form.value = {
-    title: task.title,
-    description: task.description ?? '',
-    status: task.status,
-    priority: task.priority,
-    category: task.category ?? '',
-    notes: task.notes ?? '',
-    due_date: task.due_date ?? '',
-  };
+function openTask(task: Task) {
+  selectedTask.value = task;
+  modalMode.value = 'details';
   formError.value = '';
   isFormOpen.value = true;
+}
+
+function beginEdit() {
+  if (!selectedTask.value) return;
+
+  editingTaskId.value = selectedTask.value.id;
+  form.value = {
+    title: selectedTask.value.title,
+    description: selectedTask.value.description ?? '',
+    status: selectedTask.value.status,
+    priority: selectedTask.value.priority,
+    category: selectedTask.value.category ?? '',
+    notes: selectedTask.value.notes ?? '',
+    due_date: selectedTask.value.due_date ?? '',
+  };
+  formError.value = '';
+  modalMode.value = 'edit';
+}
+
+function cancelEdit() {
+  formError.value = '';
+  modalMode.value = selectedTask.value ? 'details' : 'create';
 }
 
 function closeForm() {
@@ -498,20 +629,46 @@ async function saveTask() {
 
   try {
     const input = normalizedForm();
-    const successMessage =
-      editingTaskId.value === null ? 'Task created successfully.' : 'Task updated successfully.';
-    if (editingTaskId.value === null) {
+    if (modalMode.value === 'create') {
       await createTask(input);
+      isFormOpen.value = false;
+      await loadTasks();
+      feedback.value = 'Task created successfully.';
     } else {
-      await updateTask(editingTaskId.value, input);
+      if (editingTaskId.value === null) return;
+      selectedTask.value = await updateTask(editingTaskId.value, input);
+      modalMode.value = 'details';
+      await loadTasks();
+      feedback.value = 'Task updated successfully.';
     }
-    isFormOpen.value = false;
-    await loadTasks();
-    feedback.value = successMessage;
   } catch (requestError: unknown) {
     formError.value = getApiErrorMessage(requestError);
   } finally {
     isSaving.value = false;
+  }
+}
+
+async function setTaskStatus(task: Task, status: TaskStatus) {
+  if (taskActionId.value !== null) return;
+
+  taskActionId.value = task.id;
+  error.value = '';
+  feedback.value = '';
+
+  try {
+    const updatedTask = await updateTask(task.id, { status });
+    await loadTasks();
+    if (selectedTask.value?.id === updatedTask.id) {
+      selectedTask.value = updatedTask;
+    }
+    if (!error.value) {
+      feedback.value =
+        status === 'completed' ? 'Task marked as completed.' : 'Task moved to in progress.';
+    }
+  } catch (requestError: unknown) {
+    error.value = getApiErrorMessage(requestError);
+  } finally {
+    taskActionId.value = null;
   }
 }
 
