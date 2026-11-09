@@ -105,6 +105,35 @@ class TaskTest extends TestCase
         ]);
     }
 
+    public function test_completion_timestamp_is_set_and_cleared_on_status_transitions(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $this->travelTo(now()->setDate(2026, 11, 9)->setTime(10, 0));
+
+        $task = $this->postJson('/api/tasks', ['title' => 'Finish task'])
+            ->assertCreated()
+            ->json();
+
+        $firstCompletion = $this->patchJson("/api/tasks/{$task['id']}", ['status' => 'completed'])
+            ->assertOk()
+            ->json('completed_at');
+        $this->assertNotNull($firstCompletion);
+
+        $this->travel(1)->hour();
+        $this->patchJson("/api/tasks/{$task['id']}", ['status' => 'completed'])
+            ->assertOk()
+            ->assertJsonPath('completed_at', $firstCompletion);
+
+        $this->patchJson("/api/tasks/{$task['id']}", ['status' => 'pending'])
+            ->assertOk()
+            ->assertJsonPath('completed_at', null);
+
+        $this->patchJson("/api/tasks/{$task['id']}", ['status' => 'completed'])
+            ->assertOk()
+            ->assertJsonPath('completed_at', now()->toISOString());
+    }
+
     public function test_users_can_set_and_update_task_priority(): void
     {
         $user = User::factory()->create();

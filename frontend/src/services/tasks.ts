@@ -45,6 +45,19 @@ export interface DashboardSummary {
   tasks_due_today: number;
 }
 
+export type TaskActivityRange = '7d' | '30d' | '3m' | '6m' | 'year';
+
+export interface TaskActivity {
+  range: TaskActivityRange;
+  interval: 'day' | 'week' | 'month';
+  labels: string[];
+  series: {
+    created: number[];
+    completed: number[];
+    overdue: number[];
+  };
+}
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: { Accept: 'application/json' },
@@ -62,6 +75,11 @@ api.interceptors.request.use((config) => {
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const response = await api.get<DashboardSummary>('/dashboard');
+  return response.data;
+}
+
+export async function getTaskActivity(range: TaskActivityRange): Promise<TaskActivity> {
+  const response = await api.get<TaskActivity>('/dashboard/activity', { params: { range } });
   return response.data;
 }
 

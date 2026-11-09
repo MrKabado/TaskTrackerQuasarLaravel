@@ -102,6 +102,10 @@ class TaskController extends Controller
         ]);
 
         $task = $request->user()->tasks()->create($validated)->refresh();
+        if ($task->status === 'completed') {
+            $task->completed_at = now();
+            $task->save();
+        }
 
         return response()->json($task, 201);
     }
@@ -126,7 +130,15 @@ class TaskController extends Controller
             'due_date' => ['sometimes', 'nullable', 'date'],
         ]);
 
-        $task->update($validated);
+        if (array_key_exists('status', $validated)) {
+            if ($validated['status'] === 'completed' && $task->status !== 'completed') {
+                $task->completed_at = now();
+            } elseif ($validated['status'] !== 'completed' && $task->status === 'completed') {
+                $task->completed_at = null;
+            }
+        }
+
+        $task->fill($validated)->save();
 
         return response()->json($task->refresh());
     }

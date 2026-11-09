@@ -27,6 +27,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/dashboard/activity', [DashboardController::class, 'activity']);
     Route::get('/tasks/trash', [TaskController::class, 'trash']);
     Route::post('/tasks/{task}/restore', [TaskController::class, 'restore']);
     Route::delete('/tasks/{task}/force-delete', [TaskController::class, 'forceDestroy']);

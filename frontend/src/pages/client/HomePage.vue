@@ -72,128 +72,169 @@
         </article>
       </div>
 
-      <!-- Main Grid -->
-      <div class="mt-6 grid gap-6 xl:grid-cols-3">
-        <!-- Overview -->
-        <section
-          class="xl:col-span-2 rounded-2xl border border-zinc-200 bg-white"
+      <section class="mt-6 rounded-2xl border border-zinc-200 bg-white">
+        <div
+          class="flex flex-col gap-4 border-b border-zinc-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6"
         >
-          <div class="border-b border-zinc-100 px-6 py-5">
-            <h2
-              class="text-lg font-semibold tracking-tight text-zinc-950"
-            >
-              Task Overview
+          <div>
+            <h2 class="text-lg font-semibold tracking-tight text-zinc-950">
+              Task Activity Overview
             </h2>
-
             <p class="mt-1 text-sm text-zinc-500">
-              Track your progress and stay productive.
+              Created, completed, and overdue tasks over time.
             </p>
           </div>
-
-          <div class="p-6">
-            <div
-              class="flex flex-col gap-4 rounded-2xl border border-zinc-100 bg-zinc-50 p-5 md:flex-row md:items-center md:justify-between"
+          <label class="flex items-center gap-2 text-xs font-medium text-zinc-600">
+            <span>Date range</span>
+            <select
+              v-model="activityRange"
+              class="h-9 cursor-pointer rounded-lg border border-zinc-200 bg-white px-3 text-xs text-zinc-700 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
+              @change="loadActivity"
             >
-              <div>
-                <h3
-                  class="text-base font-semibold text-zinc-950"
-                >
-                  {{
-                    summary.total_tasks
-                      ? 'Keep your momentum going'
-                      : 'Ready to get started?'
-                  }}
-                </h3>
+              <option value="7d">Last 7 Days</option>
+              <option value="30d">Last 30 Days</option>
+              <option value="3m">Last 3 Months</option>
+              <option value="6m">Last 6 Months</option>
+              <option value="year">This Year</option>
+            </select>
+          </label>
+        </div>
 
-                <p class="mt-2 text-sm text-zinc-500">
-                  {{
-                    summary.total_tasks
-                      ? 'Continue working on your active tasks and complete more goals today.'
-                      : 'Create your first task and start organizing your workflow.'
-                  }}
-                </p>
-              </div>
-
-              <router-link
-                to="/tasks"
-                class="inline-flex h-10 items-center justify-center rounded-xl border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-700 transition hover:bg-zinc-100"
-              >
-                Open Tasks
-              </router-link>
-            </div>
-          </div>
-        </section>
-
-        <!-- Quick Insights -->
-        <section
-          class="rounded-2xl border border-zinc-200 bg-white"
+        <div
+          v-if="isActivityLoading"
+          class="grid min-h-[300px] place-items-center text-sm text-zinc-500"
+          role="status"
         >
-          <div class="border-b border-zinc-100 px-6 py-5">
-            <h2
-              class="text-lg font-semibold tracking-tight text-zinc-950"
-            >
-              Quick Insights
-            </h2>
-
-            <p class="mt-1 text-sm text-zinc-500">
-              Summary of your workspace.
-            </p>
-          </div>
-
-          <div class="space-y-5 p-6">
-            <div class="rounded-xl bg-amber-50/70 p-3.5">
-              <p class="text-xs font-medium uppercase tracking-wide text-amber-700">
-                Pending Tasks
-              </p>
-              <p class="mt-1 text-2xl font-semibold text-amber-800">
-                {{ summary.pending_tasks }}
-              </p>
-            </div>
-
-            <div class="rounded-xl bg-sky-50/70 p-3.5">
-              <p class="text-xs font-medium uppercase tracking-wide text-sky-700">
-                Due Today
-              </p>
-              <p class="mt-1 text-2xl font-semibold text-sky-800">
-                {{ summary.tasks_due_today }}
-              </p>
-            </div>
-
-            <div class="rounded-xl bg-emerald-50/70 p-3.5">
-              <p class="text-xs font-medium uppercase tracking-wide text-emerald-700">
-                Completion Rate
-              </p>
-
-              <p class="mt-1 text-2xl font-semibold text-emerald-800">
-                {{
-                  summary.total_tasks
-                    ? Math.round(
-                        (summary.completed_tasks /
-                          summary.total_tasks) *
-                          100
-                      )
-                    : 0
-                }}%
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-
+          Loading task activity…
+        </div>
+        <div
+          v-else-if="activityError"
+          class="flex min-h-[300px] flex-col items-center justify-center gap-3 px-5 text-center"
+        >
+          <p class="m-0 text-sm text-red-700" role="alert">{{ activityError }}</p>
+          <button
+            class="rounded-lg border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50"
+            type="button"
+            @click="loadActivity"
+          >
+            Try again
+          </button>
+        </div>
+        <div
+          v-else-if="isActivityEmpty"
+          class="grid min-h-[300px] place-items-center px-5 text-center text-sm text-zinc-500"
+        >
+          No task activity for this date range yet.
+        </div>
+        <div v-else class="h-[300px] px-2 py-4 sm:h-[340px] sm:px-5">
+          <VChart
+            class="h-full w-full"
+            :option="activityChartOption"
+            autoresize
+            aria-label="Line graph of created, completed, and overdue tasks"
+          />
+        </div>
+      </section>
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import VChart from 'vue-echarts';
+import { use } from 'echarts/core';
+import { LineChart } from 'echarts/charts';
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 import { getApiErrorMessage } from '@/services/auth';
-import { getDashboardSummary, type DashboardSummary } from '@/services/tasks';
+import {
+  getDashboardSummary,
+  getTaskActivity,
+  type DashboardSummary,
+  type TaskActivity,
+  type TaskActivityRange,
+} from '@/services/tasks';
+
+use([CanvasRenderer, GridComponent, LegendComponent, LineChart, TooltipComponent]);
 
 defineOptions({ name: 'DashboardPage' });
 
 const summary = ref<DashboardSummary | null>(null);
 const isLoading = ref(true);
 const error = ref('');
+const activityRange = ref<TaskActivityRange>('7d');
+const activity = ref<TaskActivity | null>(null);
+const isActivityLoading = ref(true);
+const activityError = ref('');
+let activityRequestId = 0;
+
+const isActivityEmpty = computed(
+  () =>
+    activity.value !== null &&
+    Object.values(activity.value.series).every((values) => values.every((value) => value === 0)),
+);
+
+const activityChartOption = computed(() => ({
+  color: ['#6366f1', '#10b981', '#f43f5e'],
+  aria: { enabled: true },
+  tooltip: { trigger: 'axis' as const },
+  legend: {
+    bottom: 0,
+    data: ['Created Tasks', 'Completed Tasks', 'Overdue Tasks'],
+    itemGap: 18,
+    textStyle: { color: '#52525b', fontFamily: 'Geist Variable, sans-serif', fontSize: 11 },
+  },
+  grid: { left: 36, right: 16, top: 16, bottom: 56, containLabel: true },
+  xAxis: {
+    type: 'category' as const,
+    boundaryGap: false,
+    data: activity.value?.labels ?? [],
+    axisLabel: {
+      color: '#71717a',
+      hideOverlap: true,
+      formatter: (label: string) => formatActivityLabel(label, activity.value?.interval),
+    },
+    axisLine: { lineStyle: { color: '#e4e4e7' } },
+    axisTick: { show: false },
+  },
+  yAxis: {
+    type: 'value' as const,
+    minInterval: 1,
+    axisLabel: { color: '#71717a' },
+    axisLine: { show: false },
+    axisTick: { show: false },
+    splitLine: { lineStyle: { color: '#f4f4f5' } },
+  },
+  series: [
+    {
+      name: 'Created Tasks',
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: 2 },
+      data: activity.value?.series.created ?? [],
+    },
+    {
+      name: 'Completed Tasks',
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: 2 },
+      data: activity.value?.series.completed ?? [],
+    },
+    {
+      name: 'Overdue Tasks',
+      type: 'line',
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 6,
+      lineStyle: { width: 2 },
+      data: activity.value?.series.overdue ?? [],
+    },
+  ],
+}));
 
 const summaryCards = computed(() => {
   if (!summary.value) return [];
@@ -238,7 +279,12 @@ const summaryCards = computed(() => {
   ];
 });
 
-onMounted(async () => {
+onMounted(() => {
+  void loadSummary();
+  void loadActivity();
+});
+
+async function loadSummary() {
   try {
     summary.value = await getDashboardSummary();
   } catch (requestError: unknown) {
@@ -246,5 +292,42 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-});
+}
+
+async function loadActivity() {
+  const requestId = ++activityRequestId;
+  isActivityLoading.value = true;
+  activityError.value = '';
+
+  try {
+    const result = await getTaskActivity(activityRange.value);
+    if (requestId === activityRequestId) activity.value = result;
+  } catch (requestError: unknown) {
+    if (requestId === activityRequestId) {
+      activityError.value = getApiErrorMessage(requestError);
+    }
+  } finally {
+    if (requestId === activityRequestId) isActivityLoading.value = false;
+  }
+}
+
+function formatActivityLabel(label: string, interval?: TaskActivity['interval']): string {
+  const [yearValue, monthValue, dayValue] = label.split('-');
+  const year = Number(yearValue);
+  const month = Number(monthValue);
+  const day = Number(dayValue);
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    (interval !== 'month' && !Number.isFinite(day))
+  ) {
+    return label;
+  }
+  const date = new Date(year, month - 1, interval === 'month' ? 1 : day);
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    ...(interval === 'month' ? {} : { day: 'numeric' as const }),
+  }).format(date);
+}
 </script>
