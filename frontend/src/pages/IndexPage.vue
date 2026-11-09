@@ -213,9 +213,9 @@
       </div>
     </section>
 
-    <footer class="border-t border-zinc-200 px-5 text-xs text-zinc-500 sm:px-6">
+    <footer class="border-t border-zinc-200 px-5 text-[13px] text-zinc-500 sm:px-6">
       <div
-        class="mx-auto flex min-h-[68px] max-w-[1120px] flex-col items-start justify-center gap-2.5 min-[521px]:flex-row min-[521px]:items-center min-[521px]:justify-between min-[521px]:gap-0"
+        class="mx-auto flex min-h-[68px] max-w-[1120px] flex-col items-center justify-center gap-2.5 py-3 text-center min-[521px]:flex-row min-[521px]:items-center min-[521px]:justify-between min-[521px]:gap-0 min-[521px]:text-left"
       >
         <router-link
           to="/"
@@ -226,10 +226,10 @@
           /></span>
           Task Tracker
         </router-link>
-        <span>Less overwhelm. More done.</span>
-        <div class="flex gap-[18px]">
-          <router-link class="hover:text-zinc-900" to="/login">Log in</router-link>
-          <router-link class="hover:text-zinc-900" to="/register">Sign up</router-link>
+        <span class="text-zinc-500">Less overwhelm. More done.</span>
+        <div class="flex items-center gap-[18px]">
+          <router-link class="transition hover:text-zinc-900" to="/login">Log in</router-link>
+          <router-link class="transition hover:text-zinc-900" to="/register">Sign up</router-link>
         </div>
       </div>
     </footer>

@@ -65,7 +65,7 @@
       </div>
 
       <nav
-        class="flex gap-1 overflow-x-auto border-b border-zinc-100 px-3 pt-3 sm:px-5"
+        class="flex items-end gap-1 overflow-x-auto border-b border-zinc-100 px-3 pt-3 sm:px-5"
         aria-label="Filter tasks"
       >
         <button
@@ -83,6 +83,19 @@
         >
           {{ filter.label }}
         </button>
+        <label class="ml-auto shrink-0 pb-2 pl-2">
+          <span class="sr-only">Filter tasks by category</span>
+          <select
+            v-model="selectedCategory"
+            class="h-8 max-w-40 cursor-pointer rounded-lg border border-zinc-200 bg-white px-2.5 text-[11px] text-zinc-700 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
+            @change="selectCategory"
+          >
+            <option value="">All categories</option>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+        </label>
       </nav>
 
       <div
@@ -101,19 +114,19 @@
           ><q-icon name="checklist" size="22px"
         /></span>
         <strong class="text-[13px] font-semibold text-zinc-800">
-          {{ currentSearch ? 'No matching tasks' : emptyTitle }}
+          {{ currentSearch || selectedCategory ? 'No matching tasks' : emptyTitle }}
         </strong>
         <span>
           {{
-            currentSearch
-              ? 'Try a different search.'
+            currentSearch || selectedCategory
+              ? 'Try changing your filters.'
               : activeFilter === 'All Tasks'
                 ? 'Create your first task to get started.'
                 : 'Try another filter to see more of your tasks.'
           }}
         </span>
         <button
-          v-if="activeFilter === 'All Tasks' && !currentSearch"
+          v-if="activeFilter === 'All Tasks' && !currentSearch && !selectedCategory"
           class="mt-2 cursor-pointer text-xs font-medium text-zinc-800 underline underline-offset-4"
           type="button"
           @click="openCreate"
@@ -125,12 +138,12 @@
         <li
           v-for="task in tasks"
           :key="task.id"
-          class="flex min-h-[69px] items-center gap-2.5 border-b border-zinc-100 px-3 py-2 last:border-0 sm:gap-3 sm:px-5"
+          class="flex min-h-[69px] items-center gap-2.5 border-b border-zinc-100 px-3 py-2 transition-colors hover:bg-zinc-100/70 last:border-0 sm:gap-3 sm:px-5"
         >
           <button
-            class="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-lg text-left transition hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:gap-3"
+            class="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:gap-3"
             type="button"
-            :aria-label="`View task: ${task.title}`"
+            :aria-label="`Edit task: ${task.title}`"
             @click="openTask(task)"
           >
             <span class="grid min-w-0 flex-1 gap-1">
@@ -138,6 +151,28 @@
               <span class="truncate text-[11px] text-zinc-400">{{
                 task.category || task.description || 'No additional details'
               }}</span>
+              <span
+                class="inline-flex w-fit shrink-0 items-center gap-1 text-[9px] font-medium capitalize sm:text-[10px]"
+                :class="
+                  task.priority === 'high'
+                    ? 'text-red-700'
+                    : task.priority === 'medium'
+                      ? 'text-orange-700'
+                      : 'text-green-700'
+                "
+              >
+                <span
+                  class="size-1.5 rounded-full"
+                  :class="
+                    task.priority === 'high'
+                      ? 'bg-red-500'
+                      : task.priority === 'medium'
+                        ? 'bg-orange-300'
+                        : 'bg-green-500'
+                  "
+                />
+                {{ task.priority }}
+              </span>
             </span>
             <span
               class="inline-flex shrink-0 rounded-full px-2 py-1 text-[9px] font-medium sm:px-2.5 sm:text-[10px]"
@@ -146,22 +181,10 @@
               {{ taskStatusLabel(task) }}
             </span>
             <span
-              class="hidden rounded-full px-2 py-1 text-[10px] capitalize sm:inline"
-              :class="
-                task.priority === 'high'
-                  ? 'bg-red-50 text-red-700'
-                  : task.priority === 'medium'
-                    ? 'bg-amber-50 text-amber-700'
-                    : 'bg-zinc-100 text-zinc-600'
-              "
-            >
-              {{ task.priority }}
-            </span>
-            <span
               class="hidden w-[85px] shrink-0 text-right text-[10px] text-zinc-500 sm:block sm:text-[11px]"
-              >{{ formatDueDate(task.due_date) }}</span
             >
-            <q-icon name="chevron_right" size="18px" class="shrink-0 text-zinc-400" />
+              {{ formatDueDate(task.due_date) }}
+            </span>
           </button>
           <div class="flex shrink-0 items-center gap-1">
             <button
@@ -187,7 +210,7 @@
               <q-icon name="task_alt" size="17px" />
             </button>
             <button
-              class="grid size-8 cursor-pointer place-items-center rounded-lg text-zinc-400 transition hover:bg-red-50 hover:text-red-700"
+              class="grid size-8 cursor-pointer place-items-center rounded-lg border border-red-200/70 bg-red-50/70 text-red-700 transition hover:bg-red-100"
               type="button"
               :title="`Delete ${task.title}`"
               :aria-label="`Delete ${task.title}`"
@@ -314,8 +337,11 @@
               />
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div class="grid min-w-0 gap-2">
+            <div
+              class="grid grid-cols-1 gap-4"
+              :class="modalMode === 'edit' ? 'sm:grid-cols-2' : ''"
+            >
+              <div v-if="modalMode === 'edit'" class="grid min-w-0 gap-2">
                 <label for="task-status" class="text-xs font-medium text-zinc-700">Status</label>
                 <select
                   id="task-status"
@@ -396,7 +422,7 @@
                 type="button"
                 @click="closeForm"
               >
-                Close
+                Cancel
               </button>
               <button
                 class="inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700"
@@ -404,7 +430,7 @@
                 @click="beginEdit"
               >
                 <q-icon name="edit" size="15px" />
-                Edit
+                Edit task
               </button>
             </template>
             <template v-else>
@@ -499,6 +525,8 @@ const filters: TaskFilter[] = [
 
 const activeFilter = ref('All Tasks');
 const tasks = ref<Task[]>([]);
+const categories = ref<string[]>([]);
+const selectedCategory = ref('');
 const isLoading = ref(true);
 const isSaving = ref(false);
 const isDeleting = ref(false);
@@ -524,7 +552,7 @@ const emptyTitle = computed(() => {
     : `No ${selected?.label.toLowerCase()} tasks`;
 });
 
-onMounted(() => loadTasks());
+onMounted(() => loadTasks(true));
 
 function emptyTask(): TaskInput {
   return {
@@ -538,7 +566,7 @@ function emptyTask(): TaskInput {
   };
 }
 
-async function loadTasks() {
+async function loadTasks(refreshCategories = false) {
   isLoading.value = true;
   error.value = '';
   feedback.value = '';
@@ -548,8 +576,23 @@ async function loadTasks() {
     const params: TaskFilters = {
       ...(selectedFilter?.status ? { status: selectedFilter.status } : {}),
       ...(selectedFilter?.deadline ? { deadline: selectedFilter.deadline } : {}),
+      ...(selectedCategory.value ? { category: selectedCategory.value } : {}),
       ...(currentSearch.value ? { search: currentSearch.value } : {}),
     };
+    if (refreshCategories) {
+      const allTasks = await getTasks();
+      categories.value = [
+        ...new Set(
+          allTasks
+            .map((task) => task.category?.trim())
+            .filter((category): category is string => Boolean(category)),
+        ),
+      ].sort((a, b) => a.localeCompare(b));
+      if (selectedCategory.value && !categories.value.includes(selectedCategory.value)) {
+        selectedCategory.value = '';
+        delete params.category;
+      }
+    }
     tasks.value = await getTasks(params);
   } catch (requestError: unknown) {
     error.value = getApiErrorMessage(requestError);
@@ -560,6 +603,10 @@ async function loadTasks() {
 
 function selectFilter(filter: TaskFilter) {
   activeFilter.value = filter.label;
+  void loadTasks();
+}
+
+function selectCategory() {
   void loadTasks();
 }
 
@@ -630,15 +677,15 @@ async function saveTask() {
   try {
     const input = normalizedForm();
     if (modalMode.value === 'create') {
-      await createTask(input);
+      await createTask({ ...input, status: 'pending' });
       isFormOpen.value = false;
-      await loadTasks();
+      await loadTasks(true);
       feedback.value = 'Task created successfully.';
     } else {
       if (editingTaskId.value === null) return;
       selectedTask.value = await updateTask(editingTaskId.value, input);
       modalMode.value = 'details';
-      await loadTasks();
+      await loadTasks(true);
       feedback.value = 'Task updated successfully.';
     }
   } catch (requestError: unknown) {
@@ -689,7 +736,7 @@ async function deleteSelectedTask() {
     await deleteTask(taskToDelete.value.id);
     isDeleteDialogOpen.value = false;
     taskToDelete.value = null;
-    await loadTasks();
+    await loadTasks(true);
     feedback.value = 'Task moved to trash.';
   } catch (requestError: unknown) {
     deleteError.value = getApiErrorMessage(requestError);
