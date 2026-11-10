@@ -1,3 +1,4 @@
+
 FROM php:8.2-cli
 
 WORKDIR /var/www/html
@@ -12,10 +13,19 @@ RUN apt-get update \
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY composer.json composer.lock ./
-RUN composer install --no-interaction --no-scripts --prefer-dist
+
+RUN composer install \
+    --no-interaction \
+    --no-scripts \
+    --prefer-dist
 
 COPY . .
 
-RUN composer dump-autoload --no-interaction --optimize --no-scripts
+RUN composer dump-autoload \
+    --no-interaction \
+    --optimize \
+    --no-scripts
 
 EXPOSE 8000
+
+CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
