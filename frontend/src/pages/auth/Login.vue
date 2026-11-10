@@ -54,19 +54,6 @@
       >
         {{ isSubmitting ? 'Logging in…' : 'Log in' }}
       </button>
-
-      <p
-        v-if="message"
-        :role="isError ? 'alert' : 'status'"
-        :class="[
-          'rounded-lg border px-3 py-2.5 text-[13px] leading-relaxed',
-          isError
-            ? 'border-red-200 bg-red-50 text-red-700'
-            : 'border-green-200 bg-green-50 text-green-800',
-        ]"
-      >
-        {{ message }}
-      </p>
     </form>
   </AuthShell>
 </template>
@@ -75,6 +62,7 @@
 import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getApiErrorMessage, login, storeAuthToken } from '@/services/auth';
+import { toast } from 'vue-sonner';
 import AuthShell from '@/components/AuthShell.vue';
 
 defineOptions({ name: 'LoginPage' });
@@ -82,20 +70,17 @@ defineOptions({ name: 'LoginPage' });
 const email = ref('');
 const password = ref('');
 const remember = ref(false);
-const message = ref('');
-const isError = ref(false);
 const isSubmitting = ref(false);
 const route = useRoute();
 const router = useRouter();
 
 async function submitLogin() {
   isSubmitting.value = true;
-  message.value = '';
-  isError.value = false;
 
   try {
     const response = await login(email.value.trim(), password.value);
     storeAuthToken(response.token, remember.value);
+    toast.success('Welcome back!');
 
     const redirect = route.query.redirect;
     const destination =
@@ -105,8 +90,7 @@ async function submitLogin() {
 
     await router.push(destination);
   } catch (error: unknown) {
-    isError.value = true;
-    message.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSubmitting.value = false;
   }

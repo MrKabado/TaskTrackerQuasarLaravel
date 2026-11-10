@@ -90,19 +90,6 @@
         {{ isSubmitting ? 'Resetting password…' : 'Reset password' }}
       </button>
 
-      <p
-        v-if="message"
-        :role="isError ? 'alert' : 'status'"
-        :class="[
-          'rounded-lg border px-3 py-2.5 text-[13px] leading-relaxed',
-          isError
-            ? 'border-red-200 bg-red-50 text-red-700'
-            : 'border-green-200 bg-green-50 text-green-800',
-        ]"
-      >
-        {{ message }}
-      </p>
-
       <router-link
         v-if="resetComplete"
         to="/login"
@@ -117,6 +104,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue';
 import { getApiErrorMessage, requestPasswordResetOtp, resetPassword } from '@/services/auth';
+import { toast } from 'vue-sonner';
 import AuthShell from '@/components/AuthShell.vue';
 
 defineOptions({ name: 'ForgotPasswordPage' });
@@ -125,8 +113,6 @@ const email = ref('');
 const otp = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
-const message = ref('');
-const isError = ref(false);
 const isSendingOtp = ref(false);
 const isSubmitting = ref(false);
 const resetComplete = ref(false);
@@ -145,17 +131,15 @@ onUnmounted(() => {
 
 async function sendOtp() {
   if (!email.value.trim()) {
-    isError.value = true;
-    message.value = 'Enter your email address before requesting a code.';
+    toast.error('Enter your email address before requesting a code.');
     return;
   }
 
   isSendingOtp.value = true;
-  message.value = '';
-  isError.value = false;
 
   try {
-    message.value = await requestPasswordResetOtp(email.value.trim());
+    const message = await requestPasswordResetOtp(email.value.trim());
+    toast.success(message);
     otpCooldown.value = 60;
     otpCooldownTimer = setInterval(() => {
       otpCooldown.value -= 1;
@@ -165,8 +149,7 @@ async function sendOtp() {
       }
     }, 1000);
   } catch (error: unknown) {
-    isError.value = true;
-    message.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSendingOtp.value = false;
   }
@@ -174,27 +157,24 @@ async function sendOtp() {
 
 async function submitReset() {
   if (password.value !== passwordConfirmation.value) {
-    isError.value = true;
-    message.value = 'The password confirmation does not match.';
+    toast.error('The password confirmation does not match.');
     return;
   }
 
   isSubmitting.value = true;
-  message.value = '';
-  isError.value = false;
   resetComplete.value = false;
 
   try {
-    message.value = await resetPassword({
+    const message = await resetPassword({
       email: email.value.trim(),
       otp: otp.value,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
     });
     resetComplete.value = true;
+    toast.success(message);
   } catch (error: unknown) {
-    isError.value = true;
-    message.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSubmitting.value = false;
   }

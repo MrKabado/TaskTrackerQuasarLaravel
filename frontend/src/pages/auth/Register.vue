@@ -103,19 +103,6 @@
       >
         {{ isSubmitting ? 'Creating account…' : 'Create account' }}
       </button>
-
-      <p
-        v-if="message"
-        :role="isError ? 'alert' : 'status'"
-        :class="[
-          'rounded-lg border px-3 py-2.5 text-[13px] leading-relaxed',
-          isError
-            ? 'border-red-200 bg-red-50 text-red-700'
-            : 'border-green-200 bg-green-50 text-green-800',
-        ]"
-      >
-        {{ message }}
-      </p>
     </form>
 
     <p class="mt-4 text-xs leading-relaxed text-zinc-500">
@@ -128,6 +115,7 @@
 import { computed, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getApiErrorMessage, register, requestRegisterOtp, storeAuthToken } from '@/services/auth';
+import { toast } from 'vue-sonner';
 import AuthShell from '@/components/AuthShell.vue';
 
 defineOptions({ name: 'RegisterPage' });
@@ -137,8 +125,6 @@ const email = ref('');
 const otp = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
-const message = ref('');
-const isError = ref(false);
 const isSendingOtp = ref(false);
 const isSubmitting = ref(false);
 const otpCooldown = ref(0);
@@ -157,17 +143,15 @@ const otpButtonLabel = computed(() => {
 
 async function sendOtp() {
   if (!email.value.trim()) {
-    isError.value = true;
-    message.value = 'Enter your email address before requesting an OTP.';
+    toast.error('Enter your email address before requesting an OTP.');
     return;
   }
 
   isSendingOtp.value = true;
-  message.value = '';
-  isError.value = false;
 
   try {
-    message.value = await requestRegisterOtp(email.value.trim());
+    const message = await requestRegisterOtp(email.value.trim());
+    toast.success(message);
     otpCooldown.value = 60;
     otpCooldownTimer = setInterval(() => {
       otpCooldown.value -= 1;
@@ -177,8 +161,7 @@ async function sendOtp() {
       }
     }, 1000);
   } catch (error: unknown) {
-    isError.value = true;
-    message.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSendingOtp.value = false;
   }
@@ -186,14 +169,11 @@ async function sendOtp() {
 
 async function submitRegistration() {
   if (password.value !== passwordConfirmation.value) {
-    isError.value = true;
-    message.value = 'The password confirmation does not match.';
+    toast.error('The password confirmation does not match.');
     return;
   }
 
   isSubmitting.value = true;
-  message.value = '';
-  isError.value = false;
 
   try {
     const response = await register({
@@ -205,10 +185,10 @@ async function submitRegistration() {
     });
 
     storeAuthToken(response.token, true);
+    toast.success('Your account has been created.');
     await router.push('/dashboard');
   } catch (error: unknown) {
-    isError.value = true;
-    message.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSubmitting.value = false;
   }

@@ -82,16 +82,11 @@
             {{ isSaving ? 'Saving…' : 'Save changes' }}
           </button>
           <p
-            v-if="profileMessage"
-            :class="[
-              'rounded-lg border px-3 py-2.5 text-xs leading-relaxed',
-              isProfileError
-                ? 'border-red-200 bg-red-50 text-red-700'
-                : 'border-green-200 bg-green-50 text-green-800',
-            ]"
-            role="status"
+            v-if="profileLoadError"
+            class="rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs leading-relaxed text-red-700"
+            role="alert"
           >
-            {{ profileMessage }}
+            {{ profileLoadError }}
           </p>
         </form>
 
@@ -164,18 +159,6 @@
             >
               {{ isChangingPassword ? 'Updating…' : 'Update password' }}
             </button>
-            <p
-              v-if="passwordMessage"
-              :class="[
-                'rounded-lg border px-3 py-2.5 text-xs leading-relaxed',
-                isPasswordError
-                  ? 'border-red-200 bg-red-50 text-red-700'
-                  : 'border-green-200 bg-green-50 text-green-800',
-              ]"
-              role="status"
-            >
-              {{ passwordMessage }}
-            </p>
           </form>
         </section>
       </template>
@@ -193,6 +176,7 @@ import {
   requestProfileEmailOtp,
   updateProfile,
 } from '@/services/auth';
+import { toast } from 'vue-sonner';
 
 defineOptions({ name: 'ProfilePage' });
 
@@ -207,15 +191,12 @@ const otpCooldown = ref(0);
 const otpCooldownForEmail = ref('');
 const isLoading = ref(true);
 const isSaving = ref(false);
-const isProfileError = ref(false);
-const profileMessage = ref('');
+const profileLoadError = ref('');
 const isPasswordFormOpen = ref(false);
 const currentPassword = ref('');
 const password = ref('');
 const passwordConfirmation = ref('');
 const isChangingPassword = ref(false);
-const isPasswordError = ref(false);
-const passwordMessage = ref('');
 let otpCooldownTimer: ReturnType<typeof setInterval> | undefined;
 
 const canRequestEmailOtp = computed(
@@ -247,8 +228,7 @@ onMounted(async () => {
     email.value = user.email;
     originalEmail.value = user.email;
   } catch (error: unknown) {
-    isProfileError.value = true;
-    profileMessage.value = getApiErrorMessage(error);
+    profileLoadError.value = getApiErrorMessage(error);
   } finally {
     isLoading.value = false;
   }
@@ -258,20 +238,16 @@ async function saveProfile() {
   const newEmail = email.value.trim();
 
   if (newEmail !== originalEmail.value && otpSentForEmail.value !== newEmail) {
-    isProfileError.value = true;
-    profileMessage.value = 'Send a verification code to your new email address first.';
+    toast.error('Send a verification code to your new email address first.');
     return;
   }
 
   if (newEmail !== originalEmail.value && !emailOtp.value.trim()) {
-    isProfileError.value = true;
-    profileMessage.value = 'Enter the verification code sent to your new email address.';
+    toast.error('Enter the verification code sent to your new email address.');
     return;
   }
 
   isSaving.value = true;
-  isProfileError.value = false;
-  profileMessage.value = '';
 
   try {
     const update: { name: string; email?: string; otp?: string } = {
@@ -287,10 +263,9 @@ async function saveProfile() {
     originalEmail.value = user.email;
     emailOtp.value = '';
     otpSentForEmail.value = '';
-    profileMessage.value = 'Your profile has been updated.';
+    toast.success('Your profile has been updated.');
   } catch (error: unknown) {
-    isProfileError.value = true;
-    profileMessage.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSaving.value = false;
   }
@@ -308,11 +283,10 @@ async function sendEmailOtp() {
   if (!requestedEmail || requestedEmail === originalEmail.value) return;
 
   isSendingOtp.value = true;
-  isProfileError.value = false;
-  profileMessage.value = '';
 
   try {
-    profileMessage.value = await requestProfileEmailOtp(requestedEmail);
+    const message = await requestProfileEmailOtp(requestedEmail);
+    toast.success(message);
     otpSentForEmail.value = requestedEmail;
     emailOtp.value = '';
     otpCooldown.value = 60;
@@ -326,8 +300,7 @@ async function sendEmailOtp() {
       }
     }, 1000);
   } catch (error: unknown) {
-    isProfileError.value = true;
-    profileMessage.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSendingOtp.value = false;
   }
@@ -335,7 +308,6 @@ async function sendEmailOtp() {
 
 function togglePasswordForm() {
   isPasswordFormOpen.value = !isPasswordFormOpen.value;
-  passwordMessage.value = '';
 
   if (!isPasswordFormOpen.value) {
     currentPassword.value = '';
@@ -346,17 +318,14 @@ function togglePasswordForm() {
 
 async function savePassword() {
   if (password.value !== passwordConfirmation.value) {
-    isPasswordError.value = true;
-    passwordMessage.value = 'The new password confirmation does not match.';
+    toast.error('The new password confirmation does not match.');
     return;
   }
 
   isChangingPassword.value = true;
-  isPasswordError.value = false;
-  passwordMessage.value = '';
 
   try {
-    passwordMessage.value = await changePassword({
+    const message = await changePassword({
       current_password: currentPassword.value,
       password: password.value,
       password_confirmation: passwordConfirmation.value,
@@ -364,9 +333,9 @@ async function savePassword() {
     currentPassword.value = '';
     password.value = '';
     passwordConfirmation.value = '';
+    toast.success(message);
   } catch (error: unknown) {
-    isPasswordError.value = true;
-    passwordMessage.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isChangingPassword.value = false;
   }

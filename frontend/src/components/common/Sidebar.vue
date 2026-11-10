@@ -79,13 +79,6 @@
           </span>
           <q-tooltip v-if="collapsed" anchor="center right" self="center left"> Log out </q-tooltip>
         </button>
-        <p
-          v-if="logoutError"
-          class="mt-2 rounded-lg border border-red-200 bg-red-50 p-2 text-[11px] text-red-700"
-          role="alert"
-        >
-          {{ logoutError }}
-        </p>
       </div>
     </aside>
   </div>
@@ -95,6 +88,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getApiErrorMessage, logout } from '@/services/auth';
+import { toast } from 'vue-sonner';
 
 defineOptions({ name: 'AppSidebar' });
 
@@ -109,7 +103,6 @@ defineEmits<{
 
 const router = useRouter();
 const isSigningOut = ref(false);
-const logoutError = ref('');
 
 const navigation = [
   { label: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
@@ -120,13 +113,13 @@ const navigation = [
 
 async function signOut() {
   isSigningOut.value = true;
-  logoutError.value = '';
 
   try {
     await logout();
+    toast.success('You have been signed out.');
     await router.push('/login');
   } catch (error: unknown) {
-    logoutError.value = getApiErrorMessage(error);
+    toast.error(getApiErrorMessage(error));
   } finally {
     isSigningOut.value = false;
   }

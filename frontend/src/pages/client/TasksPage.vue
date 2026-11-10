@@ -19,13 +19,6 @@
     </div>
 
     <p
-      v-if="feedback"
-      class="mb-4 rounded-lg border border-green-200 bg-green-50 px-3.5 py-3 text-xs text-green-800"
-      role="status"
-    >
-      {{ feedback }}
-    </p>
-    <p
       v-if="error"
       class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-xs text-red-700"
       role="alert"
@@ -417,14 +410,6 @@
                 rows="3"
               />
             </div>
-
-            <p
-              v-if="formError"
-              class="m-0 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700"
-              role="alert"
-            >
-              {{ formError }}
-            </p>
           </q-card-section>
 
           <q-card-actions align="right" class="border-t border-zinc-100 px-5 py-4">
@@ -474,13 +459,6 @@
           <p class="mt-2 text-sm leading-relaxed text-zinc-500">
             “{{ taskToDelete?.title }}” will be moved to trash.
           </p>
-          <p
-            v-if="deleteError"
-            class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700"
-            role="alert"
-          >
-            {{ deleteError }}
-          </p>
         </q-card-section>
         <q-card-actions align="right" class="px-5 pb-4">
           <button
@@ -518,6 +496,7 @@ import {
   type TaskInput,
   type TaskStatus,
 } from '@/services/tasks';
+import { toast } from 'vue-sonner';
 
 defineOptions({ name: 'TasksPage' });
 
@@ -554,9 +533,6 @@ const taskToDelete = ref<Task | null>(null);
 const searchInput = ref('');
 const currentSearch = ref('');
 const error = ref('');
-const formError = ref('');
-const deleteError = ref('');
-const feedback = ref('');
 const taskActionId = ref<number | null>(null);
 const form = ref<TaskInput>(emptyTask());
 
@@ -584,7 +560,6 @@ function emptyTask(): TaskInput {
 async function loadTasks(refreshCategories = false) {
   isLoading.value = true;
   error.value = '';
-  feedback.value = '';
 
   try {
     const selectedFilter = filters.find((filter) => filter.label === activeFilter.value);
@@ -637,14 +612,12 @@ function openCreate() {
   form.value = emptyTask();
   categorySelection.value = '';
   otherCategory.value = '';
-  formError.value = '';
   isFormOpen.value = true;
 }
 
 function openTask(task: Task) {
   selectedTask.value = task;
   modalMode.value = 'details';
-  formError.value = '';
   isFormOpen.value = true;
 }
 
@@ -663,18 +636,12 @@ function beginEdit() {
     notes: selectedTask.value.notes ?? '',
     due_date: selectedTask.value.due_date ?? '',
   };
-  categorySelection.value = hasExistingCategory
-    ? taskCategory
-    : taskCategory
-      ? OTHER_CATEGORY
-      : '';
+  categorySelection.value = hasExistingCategory ? taskCategory : taskCategory ? OTHER_CATEGORY : '';
   otherCategory.value = hasExistingCategory ? '' : taskCategory;
-  formError.value = '';
   modalMode.value = 'edit';
 }
 
 function cancelEdit() {
-  formError.value = '';
   modalMode.value = selectedTask.value ? 'details' : 'create';
 }
 
@@ -700,8 +667,6 @@ function normalizedForm(): TaskInput {
 
 async function saveTask() {
   isSaving.value = true;
-  formError.value = '';
-  feedback.value = '';
 
   try {
     const input = normalizedForm();
@@ -709,16 +674,16 @@ async function saveTask() {
       await createTask({ ...input, status: 'pending' });
       isFormOpen.value = false;
       await loadTasks(true);
-      feedback.value = 'Task created successfully.';
+      toast.success('Task created successfully.');
     } else {
       if (editingTaskId.value === null) return;
       selectedTask.value = await updateTask(editingTaskId.value, input);
       modalMode.value = 'details';
       await loadTasks(true);
-      feedback.value = 'Task updated successfully.';
+      toast.success('Task updated successfully.');
     }
   } catch (requestError: unknown) {
-    formError.value = getApiErrorMessage(requestError);
+    toast.error(getApiErrorMessage(requestError));
   } finally {
     isSaving.value = false;
   }
@@ -729,7 +694,6 @@ async function setTaskStatus(task: Task, status: TaskStatus) {
 
   taskActionId.value = task.id;
   error.value = '';
-  feedback.value = '';
 
   try {
     const updatedTask = await updateTask(task.id, { status });
@@ -737,12 +701,11 @@ async function setTaskStatus(task: Task, status: TaskStatus) {
     if (selectedTask.value?.id === updatedTask.id) {
       selectedTask.value = updatedTask;
     }
-    if (!error.value) {
-      feedback.value =
-        status === 'completed' ? 'Task marked as completed.' : 'Task moved to in progress.';
-    }
+    toast.success(
+      status === 'completed' ? 'Task marked as completed.' : 'Task moved to in progress.',
+    );
   } catch (requestError: unknown) {
-    error.value = getApiErrorMessage(requestError);
+    toast.error(getApiErrorMessage(requestError));
   } finally {
     taskActionId.value = null;
   }
@@ -750,7 +713,6 @@ async function setTaskStatus(task: Task, status: TaskStatus) {
 
 function confirmDelete(task: Task) {
   taskToDelete.value = task;
-  deleteError.value = '';
   isDeleteDialogOpen.value = true;
 }
 
@@ -758,17 +720,15 @@ async function deleteSelectedTask() {
   if (!taskToDelete.value) return;
 
   isDeleting.value = true;
-  deleteError.value = '';
-  feedback.value = '';
 
   try {
     await deleteTask(taskToDelete.value.id);
     isDeleteDialogOpen.value = false;
     taskToDelete.value = null;
     await loadTasks(true);
-    feedback.value = 'Task moved to trash.';
+    toast.success('Task moved to trash.');
   } catch (requestError: unknown) {
-    deleteError.value = getApiErrorMessage(requestError);
+    toast.error(getApiErrorMessage(requestError));
   } finally {
     isDeleting.value = false;
   }
