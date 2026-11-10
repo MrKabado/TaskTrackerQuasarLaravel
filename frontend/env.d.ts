@@ -12,6 +12,4 @@
  *   readonly MY_OTHER_VAR: string;
  * }
  */
-interface ImportMetaEnv {
-  readonly VITE_CHROME_EXTENSION_URL?: string;
-}
+interface ImportMetaEnv {}

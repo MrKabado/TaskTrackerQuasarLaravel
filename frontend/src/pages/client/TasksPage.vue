@@ -374,13 +374,25 @@
                 <label for="task-category" class="text-xs font-medium text-zinc-700"
                   >Category</label
                 >
-                <input
+                <select
                   id="task-category"
-                  v-model="form.category"
+                  v-model="categorySelection"
+                  class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
+                >
+                  <option value="">No category</option>
+                  <option v-for="category in categories" :key="category" :value="category">
+                    {{ category }}
+                  </option>
+                  <option :value="OTHER_CATEGORY">Other</option>
+                </select>
+                <input
+                  v-if="categorySelection === OTHER_CATEGORY"
+                  id="task-category-other"
+                  v-model="otherCategory"
                   class="h-[38px] w-full rounded-lg border border-zinc-200 bg-white px-3 text-[13px] text-zinc-900 outline-none transition placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
                   type="text"
                   maxlength="255"
-                  placeholder="Work, personal, school…"
+                  placeholder="Enter a new category"
                 />
               </div>
               <div class="grid min-w-0 gap-2">
@@ -523,10 +535,13 @@ const filters: TaskFilter[] = [
   { label: 'Overdue', deadline: 'overdue' },
 ];
 
+const OTHER_CATEGORY = '__other__';
 const activeFilter = ref('All Tasks');
 const tasks = ref<Task[]>([]);
 const categories = ref<string[]>([]);
 const selectedCategory = ref('');
+const categorySelection = ref('');
+const otherCategory = ref('');
 const isLoading = ref(true);
 const isSaving = ref(false);
 const isDeleting = ref(false);
@@ -620,6 +635,8 @@ function openCreate() {
   editingTaskId.value = null;
   selectedTask.value = null;
   form.value = emptyTask();
+  categorySelection.value = '';
+  otherCategory.value = '';
   formError.value = '';
   isFormOpen.value = true;
 }
@@ -634,16 +651,24 @@ function openTask(task: Task) {
 function beginEdit() {
   if (!selectedTask.value) return;
 
+  const taskCategory = selectedTask.value.category?.trim() ?? '';
+  const hasExistingCategory = categories.value.includes(taskCategory);
   editingTaskId.value = selectedTask.value.id;
   form.value = {
     title: selectedTask.value.title,
     description: selectedTask.value.description ?? '',
     status: selectedTask.value.status,
     priority: selectedTask.value.priority,
-    category: selectedTask.value.category ?? '',
+    category: taskCategory,
     notes: selectedTask.value.notes ?? '',
     due_date: selectedTask.value.due_date ?? '',
   };
+  categorySelection.value = hasExistingCategory
+    ? taskCategory
+    : taskCategory
+      ? OTHER_CATEGORY
+      : '';
+  otherCategory.value = hasExistingCategory ? '' : taskCategory;
   formError.value = '';
   modalMode.value = 'edit';
 }
@@ -663,7 +688,11 @@ function normalizedForm(): TaskInput {
     ...form.value,
     title: form.value.title.trim(),
     description: form.value.description?.trim() || null,
-    category: form.value.category?.trim() || null,
+    category:
+      (categorySelection.value === OTHER_CATEGORY
+        ? otherCategory.value
+        : categorySelection.value
+      ).trim() || null,
     notes: form.value.notes?.trim() || null,
     due_date: form.value.due_date || null,
   };

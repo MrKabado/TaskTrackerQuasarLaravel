@@ -1,7 +1,4 @@
 <script setup lang="ts">
-const extensionUrl = import.meta.env.VITE_CHROME_EXTENSION_URL;
-const isStoreListingAvailable = Boolean(extensionUrl);
-
 const features = [
   'View your tasks without opening the website.',
   'Create and manage tasks.',
@@ -54,15 +51,14 @@ const features = [
           </div>
         </div>
         <a
-          :href="isStoreListingAvailable ? extensionUrl : '#local-installation'"
-          :target="isStoreListingAvailable ? '_blank' : undefined"
-          :rel="isStoreListingAvailable ? 'noreferrer' : undefined"
+          href="/downloads/task-tracker-extension.zip"
+          download="task-tracker-extension.zip"
           class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-xs font-medium text-white transition hover:bg-zinc-700"
         >
           Get Chrome Extension
           <svg viewBox="0 0 20 20" class="size-4 fill-none stroke-current" aria-hidden="true">
             <path
-              d="M11 3h6v6m-1-5-8 8m5-5v8H3V5h8"
+              d="M10 3v10m-4-4 4 4 4-4M4 13v4h12v-4"
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="1.5"
@@ -103,18 +99,18 @@ const features = [
     </article>
 
     <section
-      v-if="!isStoreListingAvailable"
       id="local-installation"
       class="mt-6 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6"
     >
-      <h2 class="text-sm font-semibold text-zinc-900">Install the development build</h2>
+      <h2 class="text-sm font-semibold text-zinc-900">Install the extension</h2>
       <p class="mt-1 text-xs leading-relaxed text-zinc-500">
-        The Chrome Web Store listing URL has not been configured yet. To install this local build:
+        The download contains the built extension files. Extract the ZIP before loading it in Chrome.
       </p>
       <ol class="mt-4 grid gap-2.5 text-xs leading-relaxed text-zinc-600">
-        <li><span class="font-medium text-zinc-800">1.</span> Build the extension with <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">npm run build</code> from the extension folder.</li>
+        <li><span class="font-medium text-zinc-800">1.</span> Click <span class="font-medium text-zinc-800">Get Chrome Extension</span> and extract the downloaded ZIP.</li>
         <li><span class="font-medium text-zinc-800">2.</span> Open <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">chrome://extensions</code> and enable Developer mode.</li>
-        <li><span class="font-medium text-zinc-800">3.</span> Choose “Load unpacked” and select the extension’s <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">dist</code> folder.</li>
+        <li><span class="font-medium text-zinc-800">3.</span> Click “Load unpacked” and select the extracted folder containing <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">manifest.json</code>.</li>
+        <li><span class="font-medium text-zinc-800">4.</span> Open the extension and connect your Task Tracker account.</li>
       </ol>
     </section>
   </section>

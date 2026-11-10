@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useTaskTrackerStore, type TaskStatus, type TrackerTask } from './stores/taskTracker';
 
 const store = useTaskTrackerStore();
+const isCreateFormOpen = ref(false);
+const OTHER_CATEGORY = '__other__';
+const categorySelection = ref('');
+const otherCategory = ref('');
 const loginForm = reactive({ email: '', password: '' });
 const createForm = reactive({
   title: '',
-  category: '',
   priority: 'medium' as 'low' | 'medium' | 'high',
   due_date: '',
 });
@@ -18,6 +21,13 @@ const filters: Array<{ label: string; value: TaskStatus | 'all' }> = [
 ];
 
 const appUrl = import.meta.env.VITE_APP_URL || 'http://localhost:5173';
+const categories = computed(() =>
+  [
+    ...new Set(
+      store.tasks.map((task) => task.category?.trim()).filter((value): value is string => Boolean(value)),
+    ),
+  ].sort((a, b) => a.localeCompare(b)),
+);
 const visibleTasks = computed(() =>
   store.activeFilter === 'all'
     ? store.tasks
@@ -36,7 +46,11 @@ async function submitLogin() {
 async function submitTask() {
   const created = await store.createTask({
     title: createForm.title.trim(),
-    category: createForm.category.trim() || null,
+    category:
+      (categorySelection.value === OTHER_CATEGORY
+        ? otherCategory.value
+        : categorySelection.value
+      ).trim() || null,
     priority: createForm.priority,
     due_date: createForm.due_date || null,
     description: null,
@@ -46,10 +60,21 @@ async function submitTask() {
 
   if (created) {
     createForm.title = '';
-    createForm.category = '';
+    categorySelection.value = '';
+    otherCategory.value = '';
     createForm.priority = 'medium';
     createForm.due_date = '';
+    isCreateFormOpen.value = false;
   }
+}
+
+function openCreateTask() {
+  createForm.title = '';
+  createForm.priority = 'medium';
+  createForm.due_date = '';
+  categorySelection.value = '';
+  otherCategory.value = '';
+  isCreateFormOpen.value = true;
 }
 
 function formatDueDate(date: string | null): string {
@@ -57,6 +82,22 @@ function formatDueDate(date: string | null): string {
   return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(
     new Date(`${date}T00:00:00`),
   );
+}
+
+function statusLabel(status: TaskStatus): string {
+  return status === 'pending' ? 'To do' : status === 'in_progress' ? 'In progress' : 'Done';
+}
+
+function statusClasses(status: TaskStatus): string {
+  if (status === 'completed') return 'bg-emerald-50 text-emerald-700 ring-emerald-600/15';
+  if (status === 'in_progress') return 'bg-sky-50 text-sky-700 ring-sky-600/15';
+  return 'bg-amber-50 text-amber-700 ring-amber-600/15';
+}
+
+function priorityClasses(priority: TrackerTask['priority']): string {
+  if (priority === 'high') return 'bg-rose-50 text-rose-700 ring-rose-600/15';
+  if (priority === 'medium') return 'bg-orange-50 text-orange-700 ring-orange-600/15';
+  return 'bg-emerald-50 text-emerald-700 ring-emerald-600/15';
 }
 
 function confirmDelete(task: TrackerTask) {
@@ -195,7 +236,21 @@ function confirmDelete(task: TrackerTask) {
             <p class="text-xs font-medium text-zinc-500">Your workspace</p>
             <h1 class="mt-1 text-2xl font-semibold tracking-tight">Tasks</h1>
           </div>
-          <span class="pb-1 text-xs text-zinc-500">{{ store.tasks.length }} total</span>
+          <div class="flex shrink-0 items-center gap-2">
+            <span class="pb-1 text-xs text-zinc-500">{{ store.tasks.length }} total</span>
+            <button
+              class="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-zinc-900 px-3 text-xs font-medium text-white transition hover:bg-zinc-700"
+              type="button"
+              :aria-expanded="isCreateFormOpen"
+              aria-controls="create-task-form"
+              @click="openCreateTask"
+            >
+              <svg viewBox="0 0 20 20" class="size-4 fill-none stroke-current" aria-hidden="true">
+                <path d="M10 4v12m-6-6h12" stroke-linecap="round" stroke-width="1.8" />
+              </svg>
+              Add task
+            </button>
+          </div>
         </div>
 
         <p
@@ -207,16 +262,24 @@ function confirmDelete(task: TrackerTask) {
         </p>
 
         <form
+          v-if="isCreateFormOpen"
+          id="create-task-form"
           class="grid gap-3 rounded-xl border border-zinc-200 bg-white p-3.5 shadow-sm shadow-zinc-900/[0.02]"
           @submit.prevent="submitTask"
         >
-          <div class="flex items-center gap-2">
-            <span class="grid size-7 place-items-center rounded-lg bg-zinc-100 text-zinc-600">
-              <svg viewBox="0 0 24 24" class="size-4 fill-none stroke-current" aria-hidden="true">
-                <path d="M12 5v14m-7-7h14" stroke-linecap="round" stroke-width="2" />
-              </svg>
-            </span>
+          <div class="flex items-center justify-between gap-3">
             <h2 class="text-sm font-semibold">Add a task</h2>
+            <button
+              class="grid size-8 shrink-0 place-items-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-50"
+              type="button"
+              aria-label="Close add task form"
+              :disabled="store.isBusy"
+              @click="isCreateFormOpen = false"
+            >
+              <svg viewBox="0 0 20 20" class="size-4 fill-none stroke-current" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" stroke-linecap="round" stroke-width="1.8" />
+              </svg>
+            </button>
           </div>
           <input
             v-model="createForm.title"
@@ -228,14 +291,17 @@ function confirmDelete(task: TrackerTask) {
             placeholder="What needs to get done?"
           />
           <div class="grid grid-cols-2 gap-2">
-            <input
-              v-model="createForm.category"
+            <select
+              v-model="categorySelection"
               class="h-9 min-w-0 rounded-lg border border-zinc-200 px-2.5 text-xs outline-none transition placeholder:text-zinc-400 focus:border-zinc-400"
-              type="text"
-              maxlength="255"
               aria-label="Category"
-              placeholder="Category (optional)"
-            />
+            >
+              <option value="">No category</option>
+              <option v-for="category in categories" :key="category" :value="category">
+                {{ category }}
+              </option>
+              <option :value="OTHER_CATEGORY">Other</option>
+            </select>
             <select
               v-model="createForm.priority"
               class="h-9 min-w-0 rounded-lg border border-zinc-200 bg-white px-2.5 text-xs text-zinc-700 outline-none focus:border-zinc-400"
@@ -246,6 +312,15 @@ function confirmDelete(task: TrackerTask) {
               <option value="high">High priority</option>
             </select>
           </div>
+          <input
+            v-if="categorySelection === OTHER_CATEGORY"
+            v-model="otherCategory"
+            class="h-9 min-w-0 rounded-lg border border-zinc-200 px-2.5 text-xs outline-none transition placeholder:text-zinc-400 focus:border-zinc-400"
+            type="text"
+            maxlength="255"
+            aria-label="New category"
+            placeholder="Enter a new category"
+          />
           <div class="flex flex-wrap items-center justify-between gap-2">
             <label class="flex items-center gap-2 text-[11px] text-zinc-500">
               Due date
@@ -255,6 +330,14 @@ function confirmDelete(task: TrackerTask) {
                 type="date"
               />
             </label>
+            <button
+              class="inline-flex h-9 items-center justify-center rounded-lg px-3.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-100 disabled:opacity-50"
+              type="button"
+              :disabled="store.isBusy"
+              @click="isCreateFormOpen = false"
+            >
+              Cancel
+            </button>
             <button
               class="inline-flex h-9 items-center justify-center rounded-lg bg-zinc-900 px-3.5 text-xs font-medium text-white transition hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-60"
               type="submit"
@@ -320,20 +403,36 @@ function confirmDelete(task: TrackerTask) {
             </button>
             <div class="min-w-0 flex-1">
               <p
-                class="break-words text-sm font-medium"
+                class="break-words text-base font-semibold"
                 :class="task.status === 'completed' ? 'text-zinc-400 line-through' : 'text-zinc-800'"
               >
                 {{ task.title }}
               </p>
-              <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-zinc-500">
-                <span v-if="task.category">{{ task.category }}</span>
-                <span class="capitalize">{{ task.priority }} priority</span>
-                <span>{{ formatDueDate(task.due_date) }}</span>
+              <div class="mt-1.5 flex flex-wrap items-center gap-1.5">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ring-1 ring-inset"
+                  :class="priorityClasses(task.priority)"
+                >
+                  {{ task.priority }} priority
+                </span>
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset"
+                  :class="statusClasses(task.status)"
+                >
+                  {{ statusLabel(task.status) }}
+                </span>
+                <span v-if="task.category" class="ml-0.5 text-[10px] text-zinc-500">
+                  {{ task.category }}
+                </span>
+                <span class="ml-0.5 text-[10px] text-zinc-500">
+                  {{ formatDueDate(task.due_date) }}
+                </span>
               </div>
               <label class="mt-2 inline-flex items-center gap-1.5 text-[10px] text-zinc-500">
                 Status
                 <select
-                  class="h-7 rounded-md border border-zinc-200 bg-white px-1.5 text-[10px] text-zinc-700"
+                  class="h-7 rounded-md border border-transparent px-1.5 text-[10px] font-medium outline-none ring-1 ring-inset focus:ring-2 disabled:opacity-60"
+                  :class="statusClasses(task.status)"
                   :value="task.status"
                   :aria-label="`Status for ${task.title}`"
                   :disabled="store.isBusy"

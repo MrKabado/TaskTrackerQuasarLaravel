@@ -9,20 +9,20 @@ The default API URL is `http://localhost:8000/api`. Set `VITE_API_BASE_URL` in a
 ```powershell
 cd extension
 npm install
-npm run build
+npm run package
 ```
 
-The production extension is written to `extension/dist`. The build includes `manifest.json` and the `background.js` service worker.
+The production extension is written to `extension/dist`. The package command also creates `frontend/public/downloads/task-tracker-extension.zip` for the Integrations page's download button. Run it before building or deploying the frontend so the ZIP is included in the website.
+
+The ZIP is a downloadable release asset and must be included in the repository/deployment. After changing the extension, run `npm run package` and include the updated ZIP with the frontend release.
 
 ## Load in Chrome
 
 1. Open `chrome://extensions` and enable **Developer mode**.
-2. Select **Load unpacked** and choose `extension/dist`.
+2. Select **Load unpacked** and choose the extracted folder containing `manifest.json`.
 3. Click the Task Tracker toolbar button to open the side panel.
 4. Sign in with the same account used by the Task Tracker website.
 
 To test against a deployed backend, update the API URL and the matching `host_permissions`, then rebuild and reload the unpacked extension. The backend must allow cross-origin requests from the extension.
 
-## Publish the website integration link
-
-Set `VITE_CHROME_EXTENSION_URL` in the main frontend's environment to the published Chrome Web Store listing URL. Until that is available, the Integrations page shows local installation steps.
+The website's Integrations page downloads the packaged ZIP. Extract that ZIP before selecting **Load unpacked** in Chrome.

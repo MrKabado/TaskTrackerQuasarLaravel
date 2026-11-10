@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "package": "npm run build && node scripts/package-extension.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -21,6 +22,7 @@
     "@types/node": "^24.19.2",
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/tsconfig": "^0.9.1",
+    "fflate": "^0.8.3",
     "typescript": "~6.0.3",
     "vite": "^8.3.6",
     "vue-tsc": "^3.3.14"
