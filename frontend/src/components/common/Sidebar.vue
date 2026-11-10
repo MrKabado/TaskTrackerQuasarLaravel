@@ -114,6 +114,7 @@ const logoutError = ref('');
 const navigation = [
   { label: 'Dashboard', icon: 'dashboard', to: '/dashboard' },
   { label: 'Tasks', icon: 'checklist', to: '/tasks' },
+  { label: 'Integrations', icon: 'extension', to: '/integrations' },
   { label: 'Profile', icon: 'person_outline', to: '/profile' },
 ];
 

@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Task Tracker",
+  "version": "1.0.0",
+  "description": "Manage your tasks directly from Chrome.",
+  "permissions": [
+    "sidePanel",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*",
+    "http://localhost:5173/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Open Task Tracker"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  }
+}

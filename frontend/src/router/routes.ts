@@ -21,6 +21,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', component: () => import('@/pages/client/HomePage.vue') },
       { path: '/tasks', component: () => import('@/pages/client/TasksPage.vue') },
       { path: '/profile', component: () => import('@/pages/client/ProfilePage.vue') },
+      { path: '/integrations', component: () => import('@/pages/client/IntegrationsPage.vue') },
       { path: '/settings', redirect: '/profile' },
       { path: '/settings/profile', redirect: '/profile' },
       { path: '/settings/password', redirect: '/profile?changePassword=1' },

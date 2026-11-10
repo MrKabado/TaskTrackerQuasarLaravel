@@ -11,6 +11,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.3.5",
     "axios": "^1.21.1",
+    "pinia": "^4.1.0",
     "pinta": "^0.1.0",
     "tailwindcss": "^4.3.5",
     "vue": "^3.5.44"
