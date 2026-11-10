@@ -21,9 +21,13 @@
       </button>
       <router-link
         to="/dashboard"
-        class="flex items-center gap-2.5 text-sm font-semibold tracking-tight"
+        class="flex items-center gap-2.5 text-sm font-bold tracking-tight"
       >
-        <img class="size-[30px] shrink-0 rounded-lg object-cover" src="/favicon.ico" alt="" />
+        <span
+          class="grid size-[30px] shrink-0 place-items-center rounded-lg bg-zinc-900 text-[10px] font-bold tracking-tight text-white"
+          aria-hidden="true"
+          >TF</span
+        >
         <span>TaskFlow</span>
       </router-link>
     </div>

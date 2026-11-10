@@ -36,6 +36,10 @@ export default defineRouter((/* { store, ssrContext } */) => {
   });
 
   Router.beforeEach(async (to) => {
+    if (import.meta.env.QUASAR_MODE === 'capacitor' && to.path === '/integrations') {
+      return '/dashboard';
+    }
+
     const token = getAuthToken();
 
     if (to.meta.requiresAuth) {

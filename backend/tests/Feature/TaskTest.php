@@ -348,6 +348,13 @@ class TaskTest extends TestCase
         $this->postJson('/api/tasks', ['title' => 'Private'])->assertUnauthorized();
     }
 
+    public function test_unauthenticated_api_requests_return_json_without_a_login_redirect(): void
+    {
+        $this->get('/api/tasks', ['Accept' => 'text/html'])
+            ->assertUnauthorized()
+            ->assertJson(['message' => 'Unauthenticated.']);
+    }
+
     public function test_dashboard_returns_counts_for_the_authenticated_users_tasks(): void
     {
         $user = User::factory()->create();

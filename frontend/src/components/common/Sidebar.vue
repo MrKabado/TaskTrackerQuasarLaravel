@@ -109,7 +109,7 @@ const navigation = [
   { label: 'Tasks', icon: 'checklist', to: '/tasks' },
   { label: 'Integrations', icon: 'extension', to: '/integrations' },
   { label: 'Profile', icon: 'person_outline', to: '/profile' },
-];
+].filter((item) => import.meta.env.QUASAR_MODE !== 'capacitor' || item.to !== '/integrations');
 
 async function signOut() {
   isSigningOut.value = true;
