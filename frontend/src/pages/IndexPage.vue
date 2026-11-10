@@ -9,7 +9,11 @@
           to="/"
           class="inline-flex items-center gap-[9px] text-[15px] font-semibold tracking-[-0.04em]"
         >
-          <img class="size-7 shrink-0 rounded-[7px] object-cover" src="/favicon.ico" alt="" />
+          <span
+            class="grid size-7 shrink-0 place-items-center rounded-[7px] bg-zinc-900 text-[9px] font-bold tracking-tight text-white"
+            aria-hidden="true"
+            >TF</span
+          >
           TaskFlow
         </router-link>
 
@@ -43,9 +47,7 @@
         >
           A clearer way to get things done
         </p>
-        <h1 class="heading-display">
-          Your day,<br />back in focus.
-        </h1>
+        <h1 class="heading-display">Your day,<br />back in focus.</h1>
         <p
           class="mt-[22px] max-w-[400px] text-[15px] leading-[1.75] text-zinc-500 max-[520px]:text-sm"
         >
@@ -147,11 +149,7 @@
     <section id="features" class="border-t border-zinc-200 px-6 py-[76px] max-[760px]:py-14">
       <div class="mx-auto max-w-[1120px]">
         <p class="mb-3 text-[13px] text-zinc-500">A simpler way to stay on track</p>
-        <h2
-          class="heading-section m-0 max-w-[620px]"
-        >
-          Less juggling. More meaningful progress.
-        </h2>
+        <h2 class="heading-section m-0 max-w-[620px]">Less juggling. More meaningful progress.</h2>
         <p class="mt-3 text-sm leading-relaxed text-zinc-500">
           Keep your plans clear and your next step easy to find.
         </p>
@@ -196,11 +194,7 @@
       >
         <div>
           <p class="mb-3 text-[13px] text-zinc-500">A fresh start is one click away</p>
-          <h2
-            class="heading-section m-0 max-w-[620px]"
-          >
-            Ready to find your focus?
-          </h2>
+          <h2 class="heading-section m-0 max-w-[620px]">Ready to find your focus?</h2>
           <p class="mt-3 text-sm leading-relaxed text-zinc-500">
             Make space for the work and life you care about.
           </p>
@@ -221,7 +215,11 @@
           to="/"
           class="inline-flex items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900"
         >
-          <img class="size-7 shrink-0 rounded-[7px] object-cover" src="/favicon.ico" alt="" />
+          <span
+            class="grid size-7 shrink-0 place-items-center rounded-[7px] bg-zinc-900 text-[9px] font-bold tracking-tight text-white"
+            aria-hidden="true"
+            >TF</span
+          >
           TaskFlow
         </router-link>
         <span class="text-zinc-500">Less overwhelm. More done.</span>

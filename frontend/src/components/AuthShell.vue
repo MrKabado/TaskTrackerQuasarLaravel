@@ -1,14 +1,16 @@
 <template>
   <div class="flex min-h-screen flex-col p-4 font-sans text-zinc-900 sm:p-6">
-    <header
-      class="mx-auto flex min-h-[38px] w-full max-w-6xl items-center justify-between gap-3"
-    >
+    <header class="mx-auto flex min-h-[38px] w-full max-w-6xl items-center justify-between gap-3">
       <router-link
         to="/"
         class="inline-flex items-center gap-2 text-[15px] font-semibold tracking-tight"
         aria-label="TaskFlow home"
       >
-        <img class="size-7 shrink-0 rounded-lg object-cover" src="/favicon.ico" alt="" />
+        <span
+          class="grid size-7 shrink-0 place-items-center rounded-lg bg-zinc-900 text-[9px] font-bold tracking-tight text-white"
+          aria-hidden="true"
+          >TF</span
+        >
         TaskFlow
       </router-link>
       <router-link :to="backTo" class="text-[13px] text-zinc-500 transition hover:text-zinc-900">{{
