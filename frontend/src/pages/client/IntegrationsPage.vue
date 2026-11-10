@@ -23,16 +23,11 @@ const features = [
     >
       <div class="flex flex-col gap-5 border-b border-zinc-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-7">
         <div class="flex min-w-0 items-start gap-4">
-          <span class="grid size-12 shrink-0 place-items-center rounded-xl bg-zinc-900 text-white">
-            <svg viewBox="0 0 24 24" class="size-6 fill-none stroke-current" aria-hidden="true">
-              <path
-                d="M5 4h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-4l-3 3-3-3H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
-                stroke-linejoin="round"
-                stroke-width="1.7"
-              />
-              <path d="m8 11 2.5 2.5L16 8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" />
-            </svg>
-          </span>
+          <img
+            class="size-12 shrink-0 rounded-xl object-cover"
+            src="/favicon.ico"
+            alt=""
+          />
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2.5">
               <h2 class="text-base font-semibold tracking-tight text-zinc-900">

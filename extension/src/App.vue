@@ -119,11 +119,7 @@ function confirmDelete(task: TrackerTask) {
 
     <section v-else-if="!store.user" class="flex min-h-screen flex-col px-5 py-6 sm:px-7">
       <header class="flex items-center gap-3">
-        <span class="grid size-10 place-items-center rounded-xl bg-zinc-900 text-white">
-          <svg viewBox="0 0 24 24" class="size-5 fill-none stroke-current" aria-hidden="true">
-            <path d="m5 12 4 4L19 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-          </svg>
-        </span>
+        <img class="size-10 shrink-0 rounded-xl object-cover" src="/favicon.ico" alt="" />
         <div>
           <p class="text-sm font-semibold">TaskFlow</p>
           <p class="text-xs text-zinc-500">Your tasks, right in Chrome</p>
@@ -197,11 +193,7 @@ function confirmDelete(task: TrackerTask) {
         class="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6"
       >
         <div class="flex min-w-0 items-center gap-2.5">
-          <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-zinc-900 text-white">
-            <svg viewBox="0 0 24 24" class="size-5 fill-none stroke-current" aria-hidden="true">
-              <path d="m5 12 4 4L19 6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-            </svg>
-          </span>
+          <img class="size-9 shrink-0 rounded-xl object-cover" src="/favicon.ico" alt="" />
           <div class="min-w-0">
             <p class="truncate text-sm font-semibold">TaskFlow</p>
             <p class="truncate text-[11px] text-zinc-500">{{ store.user.name }}</p>

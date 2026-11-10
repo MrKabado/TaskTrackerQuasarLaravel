@@ -9,9 +9,7 @@
           to="/"
           class="inline-flex items-center gap-[9px] text-[15px] font-semibold tracking-[-0.04em]"
         >
-          <span class="grid size-7 place-items-center rounded-[7px] bg-zinc-900 text-white"
-            ><q-icon name="check" size="17px"
-          /></span>
+          <img class="size-7 shrink-0 rounded-[7px] object-cover" src="/favicon.ico" alt="" />
           TaskFlow
         </router-link>
 
@@ -223,9 +221,7 @@
           to="/"
           class="inline-flex items-center gap-2 text-[15px] font-semibold tracking-tight text-zinc-900"
         >
-          <span class="grid size-7 place-items-center rounded-[7px] bg-zinc-900 text-white"
-            ><q-icon name="check" size="15px"
-          /></span>
+          <img class="size-7 shrink-0 rounded-[7px] object-cover" src="/favicon.ico" alt="" />
           TaskFlow
         </router-link>
         <span class="text-zinc-500">Less overwhelm. More done.</span>

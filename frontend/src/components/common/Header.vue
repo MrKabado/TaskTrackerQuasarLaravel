@@ -23,9 +23,7 @@
         to="/dashboard"
         class="flex items-center gap-2.5 text-sm font-semibold tracking-tight"
       >
-        <span class="grid size-[30px] place-items-center rounded-lg bg-zinc-900 text-white">
-          <q-icon name="check" size="16px" />
-        </span>
+        <img class="size-[30px] shrink-0 rounded-lg object-cover" src="/favicon.ico" alt="" />
         <span>TaskFlow</span>
       </router-link>
     </div>

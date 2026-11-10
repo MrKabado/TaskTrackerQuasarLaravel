@@ -8,9 +8,7 @@
         class="inline-flex items-center gap-2 text-[15px] font-semibold tracking-tight"
         aria-label="TaskFlow home"
       >
-        <span class="grid size-7 place-items-center rounded-lg bg-zinc-900 text-white"
-          ><q-icon name="check" size="17px"
-        /></span>
+        <img class="size-7 shrink-0 rounded-lg object-cover" src="/favicon.ico" alt="" />
         TaskFlow
       </router-link>
       <router-link :to="backTo" class="text-[13px] text-zinc-500 transition hover:text-zinc-900">{{
