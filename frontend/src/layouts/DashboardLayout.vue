@@ -26,7 +26,7 @@ const sidebarCollapsed = ref(false);
 const mobileMenuOpen = ref(false);
 
 function toggleSidebar() {
-  if (window.matchMedia('(max-width: 760px)').matches) {
+  if (window.matchMedia('(max-width: 767px)').matches) {
     mobileMenuOpen.value = !mobileMenuOpen.value;
     return;
   }

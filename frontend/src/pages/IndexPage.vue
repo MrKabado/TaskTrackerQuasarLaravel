@@ -111,8 +111,9 @@
                 class="grid size-4 shrink-0 place-items-center rounded-full border border-zinc-900 bg-zinc-900 text-white"
                 ><q-icon name="check" size="10px"
               /></span>
-              <span class="flex-1 line-through">Review project brief</span
-              ><span class="text-[11px]">Work</span><span class="text-[11px]">9:00</span>
+              <span class="min-w-0 flex-1 truncate line-through">Review project brief</span
+              ><span class="text-[11px] max-[380px]:hidden">Work</span
+              ><span class="shrink-0 text-[11px]">9:00</span>
             </div>
             <div
               class="flex min-h-[47px] items-center gap-2.5 border-b border-zinc-100 text-xs text-zinc-400"
@@ -121,22 +122,23 @@
                 class="grid size-4 shrink-0 place-items-center rounded-full border border-zinc-900 bg-zinc-900 text-white"
                 ><q-icon name="check" size="10px"
               /></span>
-              <span class="flex-1 line-through">Send weekly update</span
-              ><span class="text-[11px]">Team</span><span class="text-[11px]">10:30</span>
+              <span class="min-w-0 flex-1 truncate line-through">Send weekly update</span
+              ><span class="text-[11px] max-[380px]:hidden">Team</span
+              ><span class="shrink-0 text-[11px]">10:30</span>
             </div>
             <div
               class="flex min-h-[47px] items-center gap-2.5 border-b border-zinc-100 text-xs text-zinc-700"
             >
               <span class="size-4 rounded-full border border-zinc-300"></span>
-              <span class="flex-1">Prepare design feedback</span
-              ><span class="text-[11px] text-zinc-400">Focus</span
-              ><span class="text-[11px] text-zinc-400">11:00</span>
+              <span class="min-w-0 flex-1 truncate">Prepare design feedback</span
+              ><span class="text-[11px] text-zinc-400 max-[380px]:hidden">Focus</span
+              ><span class="shrink-0 text-[11px] text-zinc-400">11:00</span>
             </div>
             <div class="flex min-h-[47px] items-center gap-2.5 text-xs text-zinc-700">
               <span class="size-4 rounded-full border border-zinc-300"></span>
-              <span class="flex-1">Take a proper lunch break</span
-              ><span class="text-[11px] text-zinc-400">Personal</span
-              ><span class="text-[11px] text-zinc-400">12:30</span>
+              <span class="min-w-0 flex-1 truncate">Take a proper lunch break</span
+              ><span class="text-[11px] text-zinc-400 max-[380px]:hidden">Personal</span
+              ><span class="shrink-0 text-[11px] text-zinc-400">12:30</span>
             </div>
           </div>
           <p class="mt-3 text-[11px] text-zinc-400">A little progress adds up.</p>

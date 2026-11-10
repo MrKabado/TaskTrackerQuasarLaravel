@@ -65,7 +65,7 @@
       </div>
 
       <nav
-        class="flex items-end gap-1 overflow-x-auto border-b border-zinc-100 px-3 pt-3 sm:px-5"
+        class="flex flex-wrap items-end gap-1 border-b border-zinc-100 px-3 pt-3 sm:px-5"
         aria-label="Filter tasks"
       >
         <button
@@ -83,11 +83,11 @@
         >
           {{ filter.label }}
         </button>
-        <label class="ml-auto shrink-0 pb-2 pl-2">
+        <label class="ml-auto w-full shrink-0 pb-2 pl-0 sm:w-auto sm:pl-2">
           <span class="sr-only">Filter tasks by category</span>
           <select
             v-model="selectedCategory"
-            class="h-8 max-w-40 cursor-pointer rounded-lg border border-zinc-200 bg-white px-2.5 text-[11px] text-zinc-700 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5"
+            class="h-8 w-full max-w-none cursor-pointer rounded-lg border border-zinc-200 bg-white px-2.5 text-[11px] text-zinc-700 outline-none transition focus:border-zinc-400 focus:ring-4 focus:ring-zinc-900/5 sm:w-auto sm:max-w-40"
             @change="selectCategory"
           >
             <option value="">All categories</option>
@@ -138,10 +138,10 @@
         <li
           v-for="task in tasks"
           :key="task.id"
-          class="flex min-h-[69px] items-center gap-2.5 border-b border-zinc-100 px-3 py-2 transition-colors hover:bg-zinc-100/70 last:border-0 sm:gap-3 sm:px-5"
+          class="flex min-h-[69px] flex-wrap items-center gap-2.5 border-b border-zinc-100 px-3 py-2 transition-colors hover:bg-zinc-100/70 last:border-0 sm:flex-nowrap sm:gap-3 sm:px-5"
         >
           <button
-            class="flex min-h-[52px] min-w-0 flex-1 cursor-pointer items-center gap-2.5 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:gap-3"
+            class="flex min-h-[52px] w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-lg text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-400 sm:w-auto sm:flex-1 sm:gap-3"
             type="button"
             :aria-label="`Edit task: ${task.title}`"
             @click="openTask(task)"
@@ -186,7 +186,7 @@
               {{ formatDueDate(task.due_date) }}
             </span>
           </button>
-          <div class="flex shrink-0 items-center gap-1">
+          <div class="ml-auto flex shrink-0 items-center gap-1 sm:ml-0">
             <button
               v-if="task.status !== 'in_progress'"
               class="grid size-8 cursor-pointer place-items-center rounded-lg border border-sky-200/70 bg-sky-50/70 text-sky-700 transition hover:bg-sky-100 disabled:cursor-not-allowed disabled:opacity-50"

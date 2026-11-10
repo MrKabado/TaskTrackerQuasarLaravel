@@ -40,7 +40,7 @@
         <label for="register-otp" class="text-[13px] font-medium text-zinc-700"
           >Email verification code</label
         >
-        <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+        <div class="grid grid-cols-1 gap-2 min-[400px]:grid-cols-[minmax(0,1fr)_auto]">
           <input
             id="register-otp"
             v-model="otp"
@@ -55,7 +55,7 @@
           />
           <button
             type="button"
-            class="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex min-h-[38px] w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60 min-[400px]:w-auto"
             :disabled="isSendingOtp || otpCooldown > 0"
             @click="sendOtp"
           >

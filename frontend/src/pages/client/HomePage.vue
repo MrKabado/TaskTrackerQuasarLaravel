@@ -1,7 +1,7 @@
 <template>
-  <section class="mx-auto w-full max-w-7xl px-6 py-8">
+  <section class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8">
     <!-- Header -->
-    <div class="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div class="mb-8 flex flex-col gap-4 sm:mb-10 md:flex-row md:items-center md:justify-between">
       <div>
         <p class="text-sm font-medium text-zinc-500">Dashboard</p>
 
@@ -181,8 +181,8 @@ const activityChartOption = computed(() => ({
   legend: {
     bottom: 0,
     data: ['Created Tasks', 'Completed Tasks', 'Overdue Tasks'],
-    itemGap: 18,
-    textStyle: { color: '#52525b', fontFamily: 'Geist Variable, sans-serif', fontSize: 11 },
+    itemGap: 8,
+    textStyle: { color: '#52525b', fontFamily: 'Geist Variable, sans-serif', fontSize: 10 },
   },
   grid: { left: 36, right: 16, top: 16, bottom: 56, containLabel: true },
   xAxis: {
