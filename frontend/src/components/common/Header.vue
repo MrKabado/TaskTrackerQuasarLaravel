@@ -26,7 +26,7 @@
         <span class="grid size-[30px] place-items-center rounded-lg bg-zinc-900 text-white">
           <q-icon name="check" size="16px" />
         </span>
-        <span>Task Tracker</span>
+        <span>TaskFlow</span>
       </router-link>
     </div>
 

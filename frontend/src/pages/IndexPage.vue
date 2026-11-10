@@ -12,7 +12,7 @@
           <span class="grid size-7 place-items-center rounded-[7px] bg-zinc-900 text-white"
             ><q-icon name="check" size="17px"
           /></span>
-          Task Tracker
+          TaskFlow
         </router-link>
 
         <nav
@@ -226,7 +226,7 @@
           <span class="grid size-7 place-items-center rounded-[7px] bg-zinc-900 text-white"
             ><q-icon name="check" size="15px"
           /></span>
-          Task Tracker
+          TaskFlow
         </router-link>
         <span class="text-zinc-500">Less overwhelm. More done.</span>
         <div class="flex items-center gap-[18px]">

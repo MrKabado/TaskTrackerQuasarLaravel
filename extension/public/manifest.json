@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Task Tracker",
+  "name": "TaskFlow",
   "version": "1.0.0",
   "description": "Manage your tasks directly from Chrome.",
   "permissions": [
@@ -17,7 +17,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "Open Task Tracker"
+    "default_title": "Open TaskFlow"
   },
   "side_panel": {
     "default_path": "index.html"

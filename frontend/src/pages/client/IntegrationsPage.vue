@@ -3,7 +3,7 @@ const features = [
   'View your tasks without opening the website.',
   'Create and manage tasks.',
   'Update task statuses.',
-  'Stay connected to your Task Tracker account.',
+  'Stay connected to your TaskFlow account.',
 ];
 </script>
 
@@ -36,7 +36,7 @@ const features = [
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2.5">
               <h2 class="text-base font-semibold tracking-tight text-zinc-900">
-                Task Tracker for Chrome
+                TaskFlow for Chrome
               </h2>
               <span
                 class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-medium text-emerald-700"
@@ -51,8 +51,8 @@ const features = [
           </div>
         </div>
         <a
-          href="/downloads/task-tracker-extension.zip"
-          download="task-tracker-extension.zip"
+          href="/downloads/taskflow-extension.zip"
+          download="taskflow-extension.zip"
           class="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 text-xs font-medium text-white transition hover:bg-zinc-700"
         >
           Get Chrome Extension
@@ -110,7 +110,7 @@ const features = [
         <li><span class="font-medium text-zinc-800">1.</span> Click <span class="font-medium text-zinc-800">Get Chrome Extension</span> and extract the downloaded ZIP.</li>
         <li><span class="font-medium text-zinc-800">2.</span> Open <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">chrome://extensions</code> and enable Developer mode.</li>
         <li><span class="font-medium text-zinc-800">3.</span> Click “Load unpacked” and select the extracted folder containing <code class="rounded bg-zinc-100 px-1.5 py-0.5 font-mono">manifest.json</code>.</li>
-        <li><span class="font-medium text-zinc-800">4.</span> Open the extension and connect your Task Tracker account.</li>
+        <li><span class="font-medium text-zinc-800">4.</span> Open the extension and connect your TaskFlow account.</li>
       </ol>
     </section>
   </section>

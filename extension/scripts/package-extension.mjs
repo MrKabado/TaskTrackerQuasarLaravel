@@ -6,7 +6,7 @@ import { zipSync } from 'fflate';
 const extensionRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const distDirectory = join(extensionRoot, 'dist');
 const downloadDirectory = resolve(extensionRoot, '..', 'frontend', 'public', 'downloads');
-const archivePath = join(downloadDirectory, 'task-tracker-extension.zip');
+const archivePath = join(downloadDirectory, 'taskflow-extension.zip');
 const files = {};
 
 async function addDirectory(directory) {

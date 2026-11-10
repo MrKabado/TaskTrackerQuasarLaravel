@@ -6,12 +6,12 @@
       <router-link
         to="/"
         class="inline-flex items-center gap-2 text-[15px] font-semibold tracking-tight"
-        aria-label="Task Tracker home"
+        aria-label="TaskFlow home"
       >
         <span class="grid size-7 place-items-center rounded-lg bg-zinc-900 text-white"
           ><q-icon name="check" size="17px"
         /></span>
-        Task Tracker
+        TaskFlow
       </router-link>
       <router-link :to="backTo" class="text-[13px] text-zinc-500 transition hover:text-zinc-900">{{
         backLabel

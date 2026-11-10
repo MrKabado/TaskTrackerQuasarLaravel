@@ -114,7 +114,7 @@ function confirmDelete(task: TrackerTask) {
       class="grid min-h-screen place-items-center text-sm text-zinc-500"
       role="status"
     >
-      Connecting to Task Tracker…
+      Connecting to TaskFlow…
     </div>
 
     <section v-else-if="!store.user" class="flex min-h-screen flex-col px-5 py-6 sm:px-7">
@@ -125,7 +125,7 @@ function confirmDelete(task: TrackerTask) {
           </svg>
         </span>
         <div>
-          <p class="text-sm font-semibold">Task Tracker</p>
+          <p class="text-sm font-semibold">TaskFlow</p>
           <p class="text-xs text-zinc-500">Your tasks, right in Chrome</p>
         </div>
       </header>
@@ -134,7 +134,7 @@ function confirmDelete(task: TrackerTask) {
         <p class="text-xs font-medium text-zinc-500">Welcome back</p>
         <h1 class="mt-2 text-2xl font-semibold tracking-tight">Connect your account</h1>
         <p class="mt-2 text-sm leading-relaxed text-zinc-500">
-          Sign in with your Task Tracker account to view and manage your tasks.
+          Sign in with your TaskFlow account to view and manage your tasks.
         </p>
 
         <form class="mt-7 grid gap-4" @submit.prevent="submitLogin">
@@ -184,7 +184,7 @@ function confirmDelete(task: TrackerTask) {
           target="_blank"
           rel="noreferrer"
         >
-          Create an account on Task Tracker
+          Create an account on TaskFlow
         </a>
       </div>
       <p class="text-center text-[11px] leading-relaxed text-zinc-400">
@@ -203,7 +203,7 @@ function confirmDelete(task: TrackerTask) {
             </svg>
           </span>
           <div class="min-w-0">
-            <p class="truncate text-sm font-semibold">Task Tracker</p>
+            <p class="truncate text-sm font-semibold">TaskFlow</p>
             <p class="truncate text-[11px] text-zinc-500">{{ store.user.name }}</p>
           </div>
         </div>
@@ -464,7 +464,7 @@ function confirmDelete(task: TrackerTask) {
           target="_blank"
           rel="noreferrer"
         >
-          Open Task Tracker
+          Open TaskFlow
           <svg viewBox="0 0 20 20" class="size-3.5 fill-none stroke-current" aria-hidden="true">
             <path d="M11 3h6v6m-1-5-8 8m5-5v8H3V5h8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" />
           </svg>

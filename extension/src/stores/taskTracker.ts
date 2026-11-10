@@ -65,7 +65,7 @@ function getErrorMessage(error: unknown): string {
       if (typeof payload.message === 'string') return payload.message;
     }
     if (!error.response) {
-      return 'Unable to reach Task Tracker. Check that the server is running and try again.';
+      return 'Unable to reach TaskFlow. Check that the server is running and try again.';
     }
   }
   return error instanceof Error ? error.message : 'Something went wrong. Please try again.';
@@ -117,7 +117,7 @@ export const useTaskTrackerStore = defineStore('taskTracker', () => {
     isInitializing.value = true;
     error.value = '';
     if (!hasExtensionStorage()) {
-      error.value = 'Open this page from the Task Tracker Chrome extension to connect your account.';
+      error.value = 'Open this page from the TaskFlow Chrome extension to connect your account.';
       isInitializing.value = false;
       return;
     }
@@ -142,7 +142,7 @@ export const useTaskTrackerStore = defineStore('taskTracker', () => {
 
   async function login(email: string, password: string) {
     if (!hasExtensionStorage()) {
-      error.value = 'Open this page from the Task Tracker Chrome extension to connect your account.';
+      error.value = 'Open this page from the TaskFlow Chrome extension to connect your account.';
       return;
     }
 

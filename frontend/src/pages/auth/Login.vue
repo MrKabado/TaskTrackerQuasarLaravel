@@ -1,9 +1,9 @@
 <template>
   <AuthShell
     kicker="Welcome back"
-    title="Log in to Taskflow"
+    title="Log in to TaskFlow"
     description="Enter your details to access your workspace."
-    footer-text="New to Taskflow?"
+    footer-text="New to TaskFlow?"
     footer-link="/register"
     footer-link-text="Create an account"
   >

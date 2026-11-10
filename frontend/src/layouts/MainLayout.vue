@@ -10,7 +10,7 @@
         <span class="grid size-7 place-items-center rounded-lg bg-zinc-900 text-white"
           ><q-icon name="check" size="17px"
         /></span>
-        Task Tracker
+        TaskFlow
       </router-link>
       <router-link class="text-[13px] text-zinc-500 hover:text-zinc-900" to="/"
         >Back to home</router-link
