@@ -1,1 +1,8 @@
 *.txt
+
+# Local database exports and duplicate certificates
+/task_tracker.sql
+/task_tracker.sql.zip
+/task_tracker_tidb.sql
+/backend/tasktracker.sql
+/isrgrootx1.pem

@@ -57,3 +57,17 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Render deployment
+
+Use the `backend` directory as the Docker build context and deploy with its Dockerfile. Configure
+`APP_ENV=production`, `APP_DEBUG=false`, a generated `APP_KEY`, the TiDB `DB_*` values, and
+`MYSQL_ATTR_SSL_CA=/var/www/html/isrgrootx1.pem`. Set `APP_URL` to the public API origin and
+`CORS_ALLOWED_ORIGINS` to the Vercel site origin. Do not include trailing slashes in origin values,
+and leave `DB_URL` unset when using the individual `DB_*` settings. The packaged extension's
+manifest is restricted to the configured API host.
+
+The API health check is `/up`. Configure a real SMTP mailer in Render; OTP flows will not deliver
+email with Laravel's local `log` mailer. When importing the supplied SQL dump, import it into an
+empty database and do not run migrations before the import. The dump already contains the schema
+and migration records.
