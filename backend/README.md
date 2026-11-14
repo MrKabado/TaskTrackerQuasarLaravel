@@ -67,8 +67,14 @@ Use the `backend` directory as the Docker build context and deploy with its Dock
 and leave `DB_URL` unset when using the individual `DB_*` settings. The packaged extension's
 manifest is restricted to the configured API host.
 
-The API health check is `/up`. Configure a real SMTP mailer in Render; OTP flows will not deliver
-email with Laravel's local `log` mailer. When importing the supplied SQL dump, import it into an
+The API health check is `/up`. Configure a production mail provider in Render; OTP flows will not deliver email with Laravel's
+local `log` mailer. Mailgun API delivery uses HTTPS and does not require SMTP access. Set
+`APP_ENV=production` and `MAIL_MAILER=mailgun` in Render; local `.env` settings can continue to use
+the current SMTP configuration. Add `MAILGUN_SENDING_API_KEY`,
+`MAILGUN_SANDBOX_DOMAIN` (or `MAILGUN_DOMAIN` for a verified sending domain), and
+`MAILGUN_BASE_URL` (`https://api.mailgun.net` for US or `https://api.eu.mailgun.net` for EU).
+Never commit API keys. A Mailgun sandbox can only send to authorized recipients; a verified domain
+is required to send OTPs to arbitrary users. When importing the supplied SQL dump, import it into an
 empty database and do not run migrations before the import. The dump already contains the schema
 and migration records.
 
