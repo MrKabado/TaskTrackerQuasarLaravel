@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', env('APP_ENV') === 'production' ? 'mailgun' : 'log'),
+    'default' => env('MAIL_TO_USE') ?: env('MAIL_MAILER', env('APP_ENV') === 'production' ? 'mailgun' : 'log'),
 
     /*
     |--------------------------------------------------------------------------
@@ -45,6 +45,17 @@ return [
             'port' => env('MAIL_PORT', 2525),
             'username' => env('MAIL_USERNAME'),
             'password' => env('MAIL_PASSWORD'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
+        ],
+
+        'mailtrap' => [
+            'transport' => 'smtp',
+            'scheme' => env('MAILTRAP_SCHEME', 'smtp'),
+            'host' => env('MAILTRAP_HOST', 'sandbox.smtp.mailtrap.io'),
+            'port' => env('MAILTRAP_PORT', 2525),
+            'username' => env('MAILTRAP_USERNAME'),
+            'password' => env('MAILTRAP_PASSWORD'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],

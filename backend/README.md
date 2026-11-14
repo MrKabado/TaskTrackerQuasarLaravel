@@ -67,16 +67,20 @@ Use the `backend` directory as the Docker build context and deploy with its Dock
 and leave `DB_URL` unset when using the individual `DB_*` settings. The packaged extension's
 manifest is restricted to the configured API host.
 
-The API health check is `/up`. Configure a production mail provider in Render; OTP flows will not deliver email with Laravel's
-local `log` mailer. Mailgun API delivery uses HTTPS and does not require SMTP access. Set
-`APP_ENV=production` and `MAIL_MAILER=mailgun` in Render; local `.env` settings can continue to use
-the current SMTP configuration. Add `MAILGUN_SENDING_API_KEY`,
+The API health check is `/up`. `MAIL_TO_USE` selects the mailer and takes precedence over the
+legacy `MAIL_MAILER` setting. For real OTP delivery in Render, use `APP_ENV=production` and
+`MAIL_TO_USE=mailgun`; Mailgun API delivery uses HTTPS and does not require SMTP access. Add
+`MAILGUN_SENDING_API_KEY`,
 `MAILGUN_SANDBOX_DOMAIN` (or `MAILGUN_DOMAIN` for a verified sending domain), and
 `MAILGUN_BASE_URL` (`https://api.mailgun.net` for US or `https://api.eu.mailgun.net` for EU).
-Never commit API keys. A Mailgun sandbox can only send to authorized recipients; a verified domain
-is required to send OTPs to arbitrary users. When importing the supplied SQL dump, import it into an
-empty database and do not run migrations before the import. The dump already contains the schema
-and migration records.
+For testing, set `MAIL_TO_USE=mailtrap` and configure `MAILTRAP_HOST`, `MAILTRAP_PORT`,
+`MAILTRAP_SCHEME`, `MAILTRAP_USERNAME`, and `MAILTRAP_PASSWORD` from your Mailtrap Email Sandbox
+inbox. Sandbox messages are captured in Mailtrap and are not delivered to the requested email
+addresses, so do not use it to deliver OTPs to real users. A Mailgun sandbox can only send to
+authorized recipients; a verified domain is required to send OTPs to arbitrary users. Never commit
+API keys or SMTP credentials. When importing the supplied SQL dump, import it into an empty database
+and do not run migrations before the import. The dump already contains the schema and migration
+records.
 
 Render's free web services do not provide Shell access. To initialize a new, empty database without
 Shell access, set `RUN_MIGRATIONS=true` in the Render service environment and deploy this Docker
