@@ -71,3 +71,9 @@ The API health check is `/up`. Configure a real SMTP mailer in Render; OTP flows
 email with Laravel's local `log` mailer. When importing the supplied SQL dump, import it into an
 empty database and do not run migrations before the import. The dump already contains the schema
 and migration records.
+
+Render's free web services do not provide Shell access. To initialize a new, empty database without
+Shell access, set `RUN_MIGRATIONS=true` in the Render service environment and deploy this Docker
+entrypoint. Laravel applies only pending migrations. After the first successful deployment, set
+`RUN_MIGRATIONS=false` and redeploy. Do not use this to repair a partially imported dump; switch to
+a genuinely empty database first.

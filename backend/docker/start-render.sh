@@ -2,6 +2,19 @@
 set -eu
 
 port="${PORT:-10000}"
+
+case "${RUN_MIGRATIONS:-false}" in
+    true)
+        php artisan migrate --force
+        ;;
+    false)
+        ;;
+    *)
+        echo "RUN_MIGRATIONS must be set to true or false." >&2
+        exit 1
+        ;;
+esac
+
 php artisan config:cache
 php artisan view:cache
 sed -ri "s/Listen 80/Listen ${port}/" /etc/apache2/ports.conf
