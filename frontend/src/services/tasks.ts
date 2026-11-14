@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAuthToken } from '@/services/auth';
+import { clearAuthToken, getAuthToken } from '@/services/auth';
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
 
@@ -72,6 +72,17 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      clearAuthToken();
+    }
+
+    throw error;
+  },
+);
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const response = await api.get<DashboardSummary>('/dashboard');

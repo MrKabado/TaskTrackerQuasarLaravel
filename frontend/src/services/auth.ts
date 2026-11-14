@@ -19,6 +19,9 @@ const api = axios.create({
   },
 });
 
+let validatedToken: string | null = null;
+let validationInFlight: { token: string; promise: Promise<boolean> } | null = null;
+
 api.interceptors.request.use((config) => {
   const token = getAuthToken();
 
@@ -29,6 +32,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      clearAuthToken();
+    }
+
+    throw error;
+  },
+);
+
 export function getAuthToken(): string | null {
   if (typeof window === 'undefined') {
     return null;
@@ -38,6 +52,9 @@ export function getAuthToken(): string | null {
 }
 
 export function storeAuthToken(token: string, remember: boolean): void {
+  validatedToken = token;
+  validationInFlight = null;
+
   if (remember) {
     localStorage.setItem('taskflow_token', token);
     sessionStorage.removeItem('taskflow_token');
@@ -49,22 +66,47 @@ export function storeAuthToken(token: string, remember: boolean): void {
 }
 
 export function clearAuthToken(): void {
+  validatedToken = null;
+  validationInFlight = null;
   localStorage.removeItem('taskflow_token');
   sessionStorage.removeItem('taskflow_token');
 }
 
 export async function validateAuthToken(): Promise<boolean> {
-  try {
-    await api.get<AuthUser>('/auth/user');
-    return true;
-  } catch (error: unknown) {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      clearAuthToken();
-      return false;
-    }
+  const token = getAuthToken();
 
-    throw error;
+  if (!token) {
+    validatedToken = null;
+    validationInFlight = null;
+    return false;
   }
+
+  if (validatedToken === token) return true;
+  if (validationInFlight?.token === token) return validationInFlight.promise;
+
+  const promise = api
+    .get<AuthUser>('/auth/user')
+    .then(() => {
+      if (getAuthToken() !== token) return false;
+      validatedToken = token;
+      return true;
+    })
+    .catch((error: unknown) => {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (getAuthToken() === token) clearAuthToken();
+        return false;
+      }
+
+      throw error;
+    })
+    .finally(() => {
+      if (validationInFlight?.promise === promise) {
+        validationInFlight = null;
+      }
+    });
+
+  validationInFlight = { token, promise };
+  return promise;
 }
 
 export async function getCurrentUser(): Promise<AuthUser> {
