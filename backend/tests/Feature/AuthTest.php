@@ -100,6 +100,33 @@ class AuthTest extends TestCase
         Mail::assertSent(OtpMail::class, fn (OtpMail $mail) => $mail->hasTo('jane@example.com'));
     }
 
+    public function test_registration_otp_cooldown_counts_down_and_expires_after_one_minute(): void
+    {
+        Mail::fake();
+        $this->travelTo(now());
+
+        $otp = Otp::create([
+            'email' => 'jane@example.com',
+            'otp' => '123456',
+            'expires_at' => now()->addMinutes(5),
+            'last_sent_at' => now()->subSeconds(20),
+        ]);
+
+        $this->postJson('/api/auth/send-register-otp', [
+            'email' => 'jane@example.com',
+        ])->assertStatus(429)
+            ->assertJsonPath('retry_after', 40);
+
+        $otp->update(['last_sent_at' => now()->subHour()]);
+
+        $this->postJson('/api/auth/send-register-otp', [
+            'email' => 'jane@example.com',
+        ])->assertOk()
+            ->assertJsonPath('retry_after', 60);
+
+        Mail::assertSent(OtpMail::class, fn (OtpMail $mail) => $mail->hasTo('jane@example.com'));
+    }
+
     public function test_authenticated_user_can_request_an_otp_for_a_new_profile_email(): void
     {
         Mail::fake();
